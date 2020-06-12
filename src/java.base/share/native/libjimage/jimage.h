@@ -29,13 +29,27 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "jni.h"
-
-#ifdef __cplusplus
+#ifndef _JEXTRACT_H_
+  #include "jni.h"
   #define EXTERN_C extern "C"
   // Opaque reference to a JImage file.
   class JImageFile;
 #else
+
+  #ifdef _WIN64
+    #define JNIEXPORT __declspec(dllexport)
+  #elif (defined(__GNUC__) && ((__GNUC__ > 4) || (__GNUC__ == 4) && (__GNUC_MINOR__ > 2))) || __has_attribute(visibility)
+    #ifdef ARM
+      #define JNIEXPORT     __attribute__((externally_visible,visibility("default")))
+    #else
+      #define JNIEXPORT     __attribute__((visibility("default")))
+    #endif
+  #else
+    #define JNIEXPORT
+  #endif
+
+  typedef long long jlong;
+  typedef int jint;
   #define EXTERN_C
   typedef struct JImageFile JImageFile;
   typedef int bool;
