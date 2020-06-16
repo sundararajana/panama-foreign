@@ -89,22 +89,6 @@ public final class jimage_h {
         return -3;
     }
 
-    public static class Cjlong extends Clong_long {
-        private Cjlong() {}
-    }
-
-    public static class Cjint extends Cint {
-        private Cjint() {}
-    }
-
-    public static class Cbool extends Cint {
-        private Cbool() {}
-    }
-
-    public static class CJImageLocationRef extends Clong_long {
-        private CJImageLocationRef() {}
-    }
-
     public static MethodHandle JIMAGE_Open$MH() {
         return Constants.JIMAGE_Open$MH;
     }
@@ -187,7 +171,7 @@ public final class jimage_h {
                     "(Ljdk/incubator/foreign/MemoryAddress;Ljdk/incubator/foreign/MemoryAddress;Ljdk/incubator/foreign/MemoryAddress;Ljdk/incubator/foreign/MemoryAddress;Ljdk/incubator/foreign/MemoryAddress;Ljdk/incubator/foreign/MemoryAddress;Ljdk/incubator/foreign/MemoryAddress;)I");
         }
 
-        public static MemoryAddress allocate(JIMAGE_ResourceIterator$visitor fi, CScope scope) {
+        public static MemoryAddress allocate(JIMAGE_ResourceIterator$visitor fi, NativeScope scope) {
             return scope.register(allocate(fi)).baseAddress();
         }
     }
