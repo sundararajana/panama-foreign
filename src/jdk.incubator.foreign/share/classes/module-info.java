@@ -37,4 +37,10 @@ module jdk.incubator.foreign {
     exports jdk.internal.foreign.abi.x64.windows to jdk.incubator.jextract;
     exports jdk.internal.foreign.abi to jdk.incubator.jextract;
     exports jdk.internal.foreign to jdk.incubator.jextract;
+
+    // Built-in service providers that are located via ServiceLoader
+
+    provides java.nio.file.spi.FileSystemProvider with
+        jdk.internal.foreign.jrtfs.JrtFileSystemProvider;
+
 }

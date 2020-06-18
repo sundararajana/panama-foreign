@@ -15,6 +15,7 @@
  * accompanied this code).
  *
  * You should have received a copy of the GNU General Public License version
+ * You should have received a copy of the GNU General Public License version
  * 2 along with this work; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
@@ -38,8 +39,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import jdk.internal.foreign.jrtfs.JImage.Node;
 
 /**
  * A jrt file system built on $JAVA_HOME/modules directory ('exploded modules

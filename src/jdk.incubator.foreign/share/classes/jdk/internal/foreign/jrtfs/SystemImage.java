@@ -33,42 +33,132 @@ import java.nio.file.FileSystems;
 import java.nio.file.FileSystemNotFoundException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.attribute.FileTime;
 import java.security.AccessController;
 import java.security.CodeSource;
 import java.security.PrivilegedAction;
-
-import jdk.incubator.foreign.CSupport;
-import jdk.incubator.foreign.MemoryAddress;
-import jdk.internal.foreign.jrtfs.JImage.Node;
-import static jdk.internal.foreign.jimage.jimage_h.*;
+import java.util.List;
+import java.util.Objects;
 
 abstract class SystemImage {
+    public class ImageLocation {
+        private final long id;
+        private final long size;
+
+        public ImageLocation(long id, long size) {
+            this.id = id;
+            this.size = size;
+        }
+
+        public long getId() {
+            return id;
+        }
+        public long getSize() {
+            return size;
+        }
+    }
+
+    public abstract static class Node {
+        private final String name;
+        private final BasicFileAttributes fileAttrs;
+
+        protected Node(String name, BasicFileAttributes fileAttrs) {
+            this.name = Objects.requireNonNull(name);
+            this.fileAttrs = Objects.requireNonNull(fileAttrs);
+        }
+
+        public final String getName() {
+            return name;
+        }
+
+        public final BasicFileAttributes getFileAttributes() {
+            return fileAttrs;
+        }
+
+        // resolve this Node (if this is a soft link, get underlying Node)
+        public final Node resolveLink() {
+            return resolveLink(false);
+        }
+
+        public Node resolveLink(boolean recursive) {
+            return this;
+        }
+
+        // is this a soft link Node?
+        public boolean isLink() {
+            return false;
+        }
+
+        public boolean isDirectory() {
+            return false;
+        }
+
+        public List<Node> getChildren() {
+            throw new IllegalArgumentException("not a directory: " + getNameString());
+        }
+
+        public boolean isResource() {
+            return false;
+        }
+
+        public ImageLocation getLocation() {
+            throw new IllegalArgumentException("not a resource: " + getNameString());
+        }
+
+        public long size() {
+            return getLocation().getSize();
+        }
+
+        public final FileTime creationTime() {
+            return fileAttrs.creationTime();
+        }
+
+        public final FileTime lastAccessTime() {
+            return fileAttrs.lastAccessTime();
+        }
+
+        public final FileTime lastModifiedTime() {
+            return fileAttrs.lastModifiedTime();
+        }
+
+        public final String getNameString() {
+            return name;
+        }
+
+        @Override
+        public final String toString() {
+            return getNameString();
+        }
+
+        @Override
+        public final int hashCode() {
+            return name.hashCode();
+        }
+
+        @Override
+        public final boolean equals(Object other) {
+            if (this == other) {
+                return true;
+            }
+
+            if (other instanceof Node) {
+                return name.equals(((Node) other).name);
+            }
+
+            return false;
+        }
+    }
 
     abstract Node findNode(String path) throws IOException;
+
     abstract byte[] getResource(Node node) throws IOException;
+
     abstract void close() throws IOException;
 
     static SystemImage open() throws IOException {
         if (modulesImageExists) {
-            // open a .jimage and build directory structure
-            var nameSeg = CSupport.toCString(moduleImageFile.toAbsolutePath().toString());
-            var jimage = JIMAGE_Open(nameSeg.baseAddress(), MemoryAddress.NULL);
-            nameSeg.close();
-            // FIXME image.getRootDirectory();
-            return new SystemImage() {
-                @Override
-                Node findNode(String path) throws IOException {
-                    return null; // FIXME image.findNode(path);
-                }
-                @Override
-                byte[] getResource(Node node) throws IOException {
-                    return null; // FIXME image.getResource(node);
-                }
-                @Override
-                void close() throws IOException {
-                    JIMAGE_Close(jimage);
-                }
-            };
+            return new ModulesFileImage(moduleImageFile);
         }
         if (Files.notExists(explodedModulesDir))
             throw new FileSystemNotFoundException(explodedModulesDir.toString());
@@ -92,12 +182,12 @@ abstract class SystemImage {
         explodedModulesDir = fs.getPath(RUNTIME_HOME, "modules");
 
         modulesImageExists = AccessController.doPrivileged(
-            new PrivilegedAction<Boolean>() {
-                @Override
-                public Boolean run() {
-                    return Files.isRegularFile(moduleImageFile);
-                }
-            });
+                new PrivilegedAction<Boolean>() {
+                    @Override
+                    public Boolean run() {
+                        return Files.isRegularFile(moduleImageFile);
+                    }
+                });
     }
 
     /**

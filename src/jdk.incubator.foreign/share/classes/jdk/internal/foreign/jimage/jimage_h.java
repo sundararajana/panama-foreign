@@ -35,7 +35,7 @@ public final class jimage_h {
 
     private static class Constants {
          static final FunctionDescriptor JIMAGE_ResourceIterator$visitor$DESC = FunctionDescriptor.of(
-                 C_POINTER, C_POINTER, C_POINTER, C_POINTER, C_POINTER, C_POINTER, C_POINTER);
+                 C_INT, C_POINTER, C_POINTER, C_POINTER, C_POINTER, C_POINTER, C_POINTER, C_POINTER);
 
          static final MethodHandle JIMAGE_Open$MH = RuntimeHelper.downcallHandle(
                 new LibraryLookup[0], "JIMAGE_Open",

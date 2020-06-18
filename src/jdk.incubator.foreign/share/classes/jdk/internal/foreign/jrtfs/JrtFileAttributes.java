@@ -27,7 +27,7 @@ package jdk.internal.foreign.jrtfs;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
 import java.util.Formatter;
-import jdk.internal.foreign.jrtfs.JImage.Node;
+import jdk.internal.foreign.jrtfs.SystemImage.Node;
 
 /**
  * File attributes implementation for jrt image file system.
@@ -86,26 +86,6 @@ final class JrtFileAttributes  implements BasicFileAttributes {
         return node.resolveLink(true);
     }
 
-    ///////// jrtfs specific attributes ///////////
-    /**
-     * Compressed resource file. If not available or not applicable, 0L is
-     * returned.
-     *
-     * @return the compressed resource size for compressed resources.
-     */
-    public long compressedSize() {
-        return node.compressedSize();
-    }
-
-    /**
-     * "file" extension of a file resource.
-     *
-     * @return extension string for the file resource
-     */
-    public String extension() {
-        return node.extension();
-    }
-
     @Override
     public final String toString() {
         StringBuilder sb = new StringBuilder(1024);
@@ -127,8 +107,6 @@ final class JrtFileAttributes  implements BasicFileAttributes {
             fm.format("    isOther         : %b%n", isOther());
             fm.format("    fileKey         : %s%n", fileKey());
             fm.format("    size            : %d%n", size());
-            fm.format("    compressedSize  : %d%n", compressedSize());
-            fm.format("    extension       : %s%n", extension());
         }
         return sb.toString();
     }

@@ -62,7 +62,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Pattern;
-import static jdk.internal.foreign.jrtfs.JImage.Node;
+import static jdk.internal.foreign.jrtfs.SystemImage.Node;
 
 /**
  * jrt file system implementation built on System jimage files.

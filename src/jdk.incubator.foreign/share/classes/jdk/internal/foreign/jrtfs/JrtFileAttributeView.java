@@ -45,9 +45,7 @@ final class JrtFileAttributeView implements BasicFileAttributeView {
         isRegularFile,
         isSymbolicLink,
         isOther,
-        fileKey,
-        compressedSize,
-        extension
+        fileKey
     };
 
     private final JrtPath path;
@@ -176,16 +174,6 @@ final class JrtFileAttributeView implements BasicFileAttributeView {
                 return jrtfas.isOther();
             case fileKey:
                 return jrtfas.fileKey();
-            case compressedSize:
-                if (isJrtView) {
-                    return jrtfas.compressedSize();
-                }
-                break;
-            case extension:
-                if (isJrtView) {
-                    return jrtfas.extension();
-                }
-                break;
         }
         return null;
     }

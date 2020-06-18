@@ -186,7 +186,7 @@ typedef jlong(*JImageGetResource_t)(JImageFile* jimage, JImageLocationRef locati
  * The visitor function is called with the image file, the module name, the
  * package name, the base name, the extension and the visitor argument. The return
  * value of the visitor function should be true, unless an early iteration exit is
- * required. All strings are utf-8, zero byte terminated.file.
+ * required. All strings are utf-8, zero byte terminated.
  *
  * Ex.
  *   bool ctw_visitor(JImageFile* jimage, const char* module_name, const char* version,
