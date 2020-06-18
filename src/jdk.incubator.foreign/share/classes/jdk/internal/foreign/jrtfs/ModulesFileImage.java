@@ -46,6 +46,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import static jdk.incubator.foreign.MemoryAddress.NULL;
+import static jdk.incubator.foreign.CSupport.toCString;
 import static jdk.incubator.foreign.CSupport.toJavaStringRestricted;
 import static jdk.internal.foreign.jimage.jimage_h.*;
 
@@ -270,7 +271,9 @@ public class ModulesFileImage extends SystemImage {
                     Directory pkgDir = findPackageDir(modDir, pkgName);
                     createPackageModuleLink(modName, pkgName, modDir);
                     Clong_long.set(sizePtr, 0);
-                    long id = JIMAGE_FindResource(jimage, module_name, version, module_name, sizePtr);
+                    String fullResName  = String.format("%s/%s.%s", pkgName, resName, ext);
+                    MemoryAddress fullResNamePtr = toCString(fullResName, scope);
+                    long id = JIMAGE_FindResource(jimage, module_name, version, fullResNamePtr, sizePtr);
                     if (Clong_long.get(sizePtr) != 0L) {
                         String name = getFullResourceName(modName, pkgName, resName, ext);
                         ImageLocation loc = new ImageLocation(id, Clong_long.get(sizePtr));
