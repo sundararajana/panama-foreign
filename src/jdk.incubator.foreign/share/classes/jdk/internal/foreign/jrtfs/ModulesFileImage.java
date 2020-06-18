@@ -31,6 +31,7 @@ import jdk.incubator.foreign.NativeScope;
 import jdk.internal.foreign.jimage.Cchar;
 import jdk.internal.foreign.jimage.Cint;
 import jdk.internal.foreign.jimage.Clong_long;
+import sun.security.action.GetPropertyAction;
 
 import java.io.IOException;
 import java.nio.file.FileSystemException;
@@ -49,6 +50,8 @@ import static jdk.incubator.foreign.CSupport.toJavaStringRestricted;
 import static jdk.internal.foreign.jimage.jimage_h.*;
 
 public class ModulesFileImage extends SystemImage {
+    private static boolean DEBUG = Boolean.parseBoolean(GetPropertyAction.privilegedGetProperty("jimage.jrtfs.debug"));
+
     // directory node - directory has full path name without '/' at end.
     static final class Directory extends Node {
         private final List<Node> children;
@@ -240,6 +243,9 @@ public class ModulesFileImage extends SystemImage {
         try (NativeScope scope = NativeScope.boundedScope(fileName.length() + 4 + Cint.sizeof())) {
             MemoryAddress nameAddr = CSupport.toCString(fileName, scope);
             MemoryAddress resAddr = Cint.allocate(0, scope);
+            if (DEBUG) {
+                System.err.println("Opening jimage file " + fileName);
+            }
             MemoryAddress jimage = JIMAGE_Open(nameAddr, resAddr);
             checkJImageOpenResult(Cint.get(resAddr));
             return jimage;
@@ -262,12 +268,14 @@ public class ModulesFileImage extends SystemImage {
                     String ext = toJavaStringRestricted(extension);
                     Directory modDir = findModuleDir(modName);
                     Directory pkgDir = findPackageDir(modDir, pkgName);
+                    createPackageModuleLink(modName, pkgName, modDir);
                     Clong_long.set(sizePtr, 0);
                     long id = JIMAGE_FindResource(jimage, module_name, version, module_name, sizePtr);
-                    String name = getFullResourceName(modName, pkgName, resName, ext);
-                    ImageLocation loc = new ImageLocation(id, Clong_long.get(sizePtr));
-                    newResource(pkgDir, name, loc);
-                    createPackageModuleLink(modName, pkgName, modDir);
+                    if (Clong_long.get(sizePtr) != 0L) {
+                        String name = getFullResourceName(modName, pkgName, resName, ext);
+                        ImageLocation loc = new ImageLocation(id, Clong_long.get(sizePtr));
+                        newResource(pkgDir, name, loc);
+                    }
                     return 1;
                 }, scope);
             JIMAGE_ResourceIterator(jimage, visitor, NULL);
