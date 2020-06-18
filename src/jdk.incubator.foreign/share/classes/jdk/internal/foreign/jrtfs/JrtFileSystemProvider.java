@@ -51,7 +51,7 @@ public final class JrtFileSystemProvider extends FileSystemProvider {
     }
 
     /**
-     * Need RuntimePermission "accessSystemModules" to create or get jrt:/
+     * Need RuntimePermission "accessSystemModules" to create or get jrtf:/
      */
     private void checkPermission() {
         SecurityManager sm = System.getSecurityManager();
@@ -273,8 +273,22 @@ public final class JrtFileSystemProvider extends FileSystemProvider {
 
     // test main
     public static void main(String[] args) throws Exception {
-        var fs = new JrtFileSystemProvider().getFileSystem(URI.create("jrt:/"));
+        var provider = new JrtFileSystemProvider();
+        var fs = provider.getFileSystem(URI.create(provider.getScheme() + ":/"));
         var root = fs.getPath("/");
-        Files.walk(root).forEach(System.out::println);
+        String dir = args.length > 0? args[0] : ".";
+        Files.walk(root).forEach(path -> {
+            if (Files.isRegularFile(path)) {
+                try {
+                    Path newDir = Paths.get(dir, path.getParent().toString());
+                    Files.createDirectories(newDir);
+                    Path newPath = Paths.get(dir, path.toString());
+                    System.out.println("Extracting " + newPath);
+                    Files.write(newPath, Files.readAllBytes(path));
+                } catch (IOException io) {
+                    throw new UncheckedIOException(io);
+                }
+            }
+        });
     }
 }

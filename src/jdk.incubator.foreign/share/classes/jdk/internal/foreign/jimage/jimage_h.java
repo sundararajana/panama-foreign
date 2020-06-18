@@ -59,8 +59,8 @@ public final class jimage_h {
 
          static final MethodHandle JIMAGE_GetResource$MH = RuntimeHelper.downcallHandle(
                  new LibraryLookup[0], "JIMAGE_GetResource",
-                 "(Ljdk/incubator/foreign/MemoryAddress;Ljdk/incubator/foreign/MemoryAddress;Ljdk/incubator/foreign/MemoryAddress;J)J",
-                 FunctionDescriptor.of(C_LONGLONG, C_POINTER, C_POINTER, C_POINTER, C_LONGLONG), false);
+                 "(Ljdk/incubator/foreign/MemoryAddress;JLjdk/incubator/foreign/MemoryAddress;J)J",
+                 FunctionDescriptor.of(C_LONGLONG, C_POINTER, C_LONGLONG, C_POINTER, C_LONGLONG), false);
 
          static final MethodHandle JIMAGE_ResourceIterator$MH = RuntimeHelper.downcallHandle(
                  new LibraryLookup[0], "JIMAGE_ResourceIterator",

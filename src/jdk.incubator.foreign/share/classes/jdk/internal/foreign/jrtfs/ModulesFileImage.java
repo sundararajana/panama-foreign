@@ -44,6 +44,7 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import static jdk.incubator.foreign.MemoryAddress.NULL;
 import static jdk.incubator.foreign.CSupport.toCString;
@@ -101,14 +102,18 @@ public class ModulesFileImage extends SystemImage {
     static class Resource extends Node {
         private final ImageLocation loc;
         private volatile byte[] content;
+        private Function<MemorySegment, Long> reader;
 
-        private Resource(String name, BasicFileAttributes fileAttrs, ImageLocation loc) {
+        private Resource(String name, BasicFileAttributes fileAttrs, ImageLocation loc,
+                         Function<MemorySegment, Long> reader) {
             super(name, fileAttrs);
             this.loc = loc;
+            this.reader = reader;
         }
 
-        static Resource create(Directory parent, String name, BasicFileAttributes fileAttrs, ImageLocation loc) {
-            Resource rs = new Resource(name, fileAttrs, loc);
+        static Resource create(Directory parent, String name, BasicFileAttributes fileAttrs, ImageLocation loc,
+                               Function<MemorySegment, Long> reader) {
+            Resource rs = new Resource(name, fileAttrs, loc, reader);
             parent.addChild(rs);
             return rs;
         }
@@ -133,6 +138,9 @@ public class ModulesFileImage extends SystemImage {
                 long id = loc.getId();
                 long size = loc.getSize();
                 try (MemorySegment seg = Cchar.allocateArray((int)size)) {
+                    if (reader.apply(seg) == JIMAGE_NOT_FOUND()) {
+                        throw new RuntimeException("resource " + getName() + " not found!");
+                    }
                     content = Cchar.toJavaArray(seg);
                 }
             }
@@ -274,6 +282,7 @@ public class ModulesFileImage extends SystemImage {
                     String fullResName  = String.format("%s/%s.%s", pkgName, resName, ext);
                     MemoryAddress fullResNamePtr = toCString(fullResName, scope);
                     long id = JIMAGE_FindResource(jimage, module_name, version, fullResNamePtr, sizePtr);
+                    // FIXME: possible to have zero sizes resource?
                     if (Clong_long.get(sizePtr) != 0L) {
                         String name = getFullResourceName(modName, pkgName, resName, ext);
                         ImageLocation loc = new ImageLocation(id, Clong_long.get(sizePtr));
@@ -347,7 +356,9 @@ public class ModulesFileImage extends SystemImage {
     }
 
     private Resource newResource(Directory parent, String name, ImageLocation loc) {
-        Resource res = Resource.create(parent, name, imageFileAttributes, loc);
+        Resource res = Resource.create(parent, name, imageFileAttributes, loc, seg -> {
+            return JIMAGE_GetResource(jimage, loc.getId(), seg.baseAddress(), loc.getSize());
+        });
         nodes.put(res.getName(), res);
         return res;
     }
