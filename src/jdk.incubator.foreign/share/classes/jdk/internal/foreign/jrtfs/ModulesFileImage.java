@@ -138,10 +138,16 @@ public class ModulesFileImage extends SystemImage {
                 long id = loc.getId();
                 long size = loc.getSize();
                 try (MemorySegment seg = Cchar.allocateArray((int)size)) {
+                    if (DEBUG) {
+                        System.err.println("DEBUG: reading resource: " + getName());
+                    }
                     if (reader.apply(seg) == JIMAGE_NOT_FOUND()) {
                         throw new RuntimeException("resource " + getName() + " not found!");
                     }
                     content = Cchar.toJavaArray(seg);
+                    if (DEBUG) {
+                        System.err.println("DEBUG: done reading resource: " + getName());
+                    }
                 }
             }
             return content;
@@ -227,7 +233,13 @@ public class ModulesFileImage extends SystemImage {
         if (closed) {
             throw new IOException("image file already closed");
         }
+        if (DEBUG) {
+            System.out.println("DEBUG: Closing jimage file");
+        }
         JIMAGE_Close(jimage);
+        if (DEBUG) {
+            System.out.println("DEBUG: jimage file closed");
+        }
         closed = true;
     }
 
@@ -253,7 +265,7 @@ public class ModulesFileImage extends SystemImage {
             MemoryAddress nameAddr = CSupport.toCString(fileName, scope);
             MemoryAddress resAddr = Cint.allocate(0, scope);
             if (DEBUG) {
-                System.err.println("Opening jimage file " + fileName);
+                System.err.println("DEBUG: Opening jimage file " + fileName);
             }
             MemoryAddress jimage = JIMAGE_Open(nameAddr, resAddr);
             checkJImageOpenResult(Cint.get(resAddr));
@@ -266,6 +278,9 @@ public class ModulesFileImage extends SystemImage {
         // const char* res_name, const char* extension, void* arg
         try (NativeScope scope = NativeScope.unboundedScope()) {
             MemoryAddress sizePtr = Clong_long.allocate(0L, scope);
+            if (DEBUG) {
+                System.err.println("DEBUG: Iterating resources from jimage file");
+            }
             MemoryAddress visitor = JIMAGE_ResourceIterator$visitor.allocate(
                 (jimage, module_name, version, package_name, res_name, extension, arg) -> {
                     String modName = toJavaStringRestricted(module_name);
@@ -291,6 +306,9 @@ public class ModulesFileImage extends SystemImage {
                     return 1;
                 }, scope);
             JIMAGE_ResourceIterator(jimage, visitor, NULL);
+            if (DEBUG) {
+                System.err.println("DEBUG: Resource iteration from jimage file done");
+            }
         }
     }
 
