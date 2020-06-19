@@ -200,15 +200,14 @@ public class ModulesFileImage extends SystemImage {
         }
 
         ImageLocation loc = node.getLocation();
-        long id = loc.getId();
         long size = loc.getSize();
         try (MemorySegment seg = Cchar.allocateArray((int)size)) {
             if (DEBUG) {
                 System.err.println("DEBUG: reading resource: " + node.getName());
             }
-            long res = JIMAGE_GetResource(jimage, loc.getId(), seg.baseAddress(), loc.getSize());
+            long res = JIMAGE_GetResource(jimage, loc.getId(), seg.baseAddress(), size);
             if (res == JIMAGE_NOT_FOUND()) {
-                throw new RuntimeException("resource " + node.getName() + " not found!");
+                throw new IOException("resource " + node.getName() + " not found!");
             }
             byte[] content = Cchar.toJavaArray(seg);
             if (DEBUG) {
@@ -275,23 +274,28 @@ public class ModulesFileImage extends SystemImage {
                 (jimage, module_name, version, package_name, res_name, extension, arg) -> {
                     String modName = toJavaStringRestricted(module_name);
                     String pkgName = toJavaStringRestricted(package_name);
-                    if (pkgName.isEmpty()) {
-                        return 1; // FIXME Why empty package name?
-                    }
                     String resName = toJavaStringRestricted(res_name);
                     String ext = toJavaStringRestricted(extension);
                     Directory modDir = findModuleDir(modName);
-                    Directory pkgDir = findPackageDir(modDir, pkgName);
-                    createPackageModuleLink(modName, pkgName, modDir);
+                    Directory pkgDir;
+                    if (pkgName.isEmpty()) {
+                        // resources like module-info.class
+                        pkgDir = modDir;
+                    } else {
+                        pkgDir = findPackageDir(modDir, pkgName);
+                        createPackageModuleLink(modName, pkgName, modDir);
+                    }
                     Clong_long.set(sizePtr, 0);
-                    String fullResName  = String.format("%s/%s.%s", pkgName, resName, ext);
+                    String fullResName  = pkgName.isEmpty()?
+                        String.format("%s.%s", resName, ext) :
+                        String.format("%s/%s.%s", pkgName, resName, ext);
                     MemoryAddress fullResNamePtr = toCString(fullResName, scope);
                     long id = JIMAGE_FindResource(jimage, module_name, version, fullResNamePtr, sizePtr);
                     // FIXME: possible to have zero sizes resource?
                     if (Clong_long.get(sizePtr) != 0L) {
-                        String name = getFullResourceName(modName, pkgName, resName, ext);
+                        String path = getFullResourcePath(modName, pkgName, resName, ext);
                         ImageLocation loc = new ImageLocation(id, Clong_long.get(sizePtr));
-                        newResource(pkgDir, name, loc);
+                        newResource(pkgDir, path, loc);
                     }
                     return 1;
                 }, scope);
@@ -302,8 +306,10 @@ public class ModulesFileImage extends SystemImage {
         }
     }
 
-    private String getFullResourceName(String modName, String pkgName, String resName, String ext) {
-        return String.format("%s/%s/%s/%s.%s", modulesDir.getName(), modName, pkgName, resName, ext);
+    private String getFullResourcePath(String modName, String pkgName, String resName, String ext) {
+        return pkgName.isEmpty()?
+            String.format("%s/%s/%s.%s", modulesDir.getName(), modName, resName, ext) :
+            String.format("%s/%s/%s/%s.%s", modulesDir.getName(), modName, pkgName, resName, ext);
     }
 
     private Directory findModuleDir(String modName) {
