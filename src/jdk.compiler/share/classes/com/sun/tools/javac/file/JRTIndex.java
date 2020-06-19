@@ -81,7 +81,7 @@ public class JRTIndex {
 
     public static boolean isAvailable() {
         try {
-            FileSystems.getFileSystem(URI.create("jrt:/"));
+            FileSystems.getFileSystem(URI.create(JavacFileManager.JRTFS_URI));
             return true;
         } catch (ProviderNotFoundException | FileSystemNotFoundException e) {
             return false;
@@ -177,7 +177,7 @@ public class JRTIndex {
      * Create and initialize the index.
      */
     private JRTIndex() throws IOException {
-        jrtfs = FileSystems.getFileSystem(URI.create("jrt:/"));
+        jrtfs = FileSystems.getFileSystem(URI.create(JavacFileManager.JRTFS_URI));
         entries = new HashMap<>();
     }
 

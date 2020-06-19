@@ -47,7 +47,7 @@ public final class JrtFileSystemProvider extends FileSystemProvider {
 
     @Override
     public String getScheme() {
-        return "jrt";
+        return "jrtf";
     }
 
     /**

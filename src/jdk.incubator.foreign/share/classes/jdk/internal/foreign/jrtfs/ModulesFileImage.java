@@ -51,7 +51,7 @@ import static jdk.incubator.foreign.CSupport.toJavaStringRestricted;
 import static jdk.internal.foreign.jimage.jimage_h.*;
 
 public class ModulesFileImage extends SystemImage {
-    private static boolean DEBUG = Boolean.parseBoolean(GetPropertyAction.privilegedGetProperty("jimage.jrtfs.debug"));
+    private static boolean DEBUG = Boolean.parseBoolean(GetPropertyAction.privilegedGetProperty("foreign.jrtfs.debug"));
 
     // directory node - directory has full path name without '/' at end.
     static final class Directory extends Node {

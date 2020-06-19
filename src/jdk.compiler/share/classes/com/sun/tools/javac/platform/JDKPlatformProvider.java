@@ -282,7 +282,7 @@ public class JDKPlatformProvider implements PlatformProvider {
                         fm.handleOption("--system", Arrays.asList("none").iterator());
 
                         Path jrtModules =
-                                FileSystems.getFileSystem(URI.create("jrt:/"))
+                                FileSystems.getFileSystem(URI.create(JavacFileManager.JRTFS_URI))
                                            .getPath("modules");
                         try (Stream<String> lines =
                                 Files.lines(systemModules, utf8)) {

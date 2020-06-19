@@ -1957,7 +1957,7 @@ public class Locations {
 
             if (modules == null) {
                 try {
-                    URI jrtURI = URI.create("jrt:/");
+                    URI jrtURI = URI.create(JavacFileManager.JRTFS_URI);
                     FileSystem jrtfs;
 
                     if (isCurrentPlatform(systemJavaHome)) {

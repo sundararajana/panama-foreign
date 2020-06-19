@@ -97,6 +97,8 @@ import static javax.tools.StandardLocation.*;
  */
 public class JavacFileManager extends BaseFileManager implements StandardJavaFileManager {
 
+    public static String JRTFS_URI = Boolean.getBoolean("use.foreign.jrtfs")? "jrtf:/" : "jrt:/";
+
     public static char[] toArray(CharBuffer buffer) {
         if (buffer.hasArray())
             return buffer.compact().flip().array();
