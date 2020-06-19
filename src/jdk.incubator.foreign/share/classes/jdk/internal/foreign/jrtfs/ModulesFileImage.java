@@ -44,7 +44,6 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 import static jdk.incubator.foreign.MemoryAddress.NULL;
 import static jdk.incubator.foreign.CSupport.toCString;
@@ -101,19 +100,14 @@ public class ModulesFileImage extends SystemImage {
     // full path of the resource is the "name" of the resource.
     static class Resource extends Node {
         private final ImageLocation loc;
-        private volatile byte[] content;
-        private Function<MemorySegment, Long> reader;
 
-        private Resource(String name, BasicFileAttributes fileAttrs, ImageLocation loc,
-                         Function<MemorySegment, Long> reader) {
+        private Resource(String name, BasicFileAttributes fileAttrs, ImageLocation loc) {
             super(name, fileAttrs);
             this.loc = loc;
-            this.reader = reader;
         }
 
-        static Resource create(Directory parent, String name, BasicFileAttributes fileAttrs, ImageLocation loc,
-                               Function<MemorySegment, Long> reader) {
-            Resource rs = new Resource(name, fileAttrs, loc, reader);
+        static Resource create(Directory parent, String name, BasicFileAttributes fileAttrs, ImageLocation loc) {
+            Resource rs = new Resource(name, fileAttrs, loc);
             parent.addChild(rs);
             return rs;
         }
@@ -131,26 +125,6 @@ public class ModulesFileImage extends SystemImage {
         @Override
         public long size() {
             return loc.getSize();
-        }
-
-        byte[] getContent() {
-            if (content == null) {
-                long id = loc.getId();
-                long size = loc.getSize();
-                try (MemorySegment seg = Cchar.allocateArray((int)size)) {
-                    if (DEBUG) {
-                        System.err.println("DEBUG: reading resource: " + getName());
-                    }
-                    if (reader.apply(seg) == JIMAGE_NOT_FOUND()) {
-                        throw new RuntimeException("resource " + getName() + " not found!");
-                    }
-                    content = Cchar.toJavaArray(seg);
-                    if (DEBUG) {
-                        System.err.println("DEBUG: done reading resource: " + getName());
-                    }
-                }
-            }
-            return content;
         }
     }
 
@@ -225,7 +199,23 @@ public class ModulesFileImage extends SystemImage {
             throw new FileSystemException(node.getName() + " is not file");
         }
 
-        return ((Resource)node).getContent();
+        ImageLocation loc = node.getLocation();
+        long id = loc.getId();
+        long size = loc.getSize();
+        try (MemorySegment seg = Cchar.allocateArray((int)size)) {
+            if (DEBUG) {
+                System.err.println("DEBUG: reading resource: " + node.getName());
+            }
+            long res = JIMAGE_GetResource(jimage, loc.getId(), seg.baseAddress(), loc.getSize());
+            if (res == JIMAGE_NOT_FOUND()) {
+                throw new RuntimeException("resource " + node.getName() + " not found!");
+            }
+            byte[] content = Cchar.toJavaArray(seg);
+            if (DEBUG) {
+                System.err.println("DEBUG: done reading resource: " + node.getName());
+            }
+            return content;
+        }
     }
 
     @Override
@@ -374,9 +364,7 @@ public class ModulesFileImage extends SystemImage {
     }
 
     private Resource newResource(Directory parent, String name, ImageLocation loc) {
-        Resource res = Resource.create(parent, name, imageFileAttributes, loc, seg -> {
-            return JIMAGE_GetResource(jimage, loc.getId(), seg.baseAddress(), loc.getSize());
-        });
+        Resource res = Resource.create(parent, name, imageFileAttributes, loc);
         nodes.put(res.getName(), res);
         return res;
     }
