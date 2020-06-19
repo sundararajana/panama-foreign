@@ -37,3 +37,13 @@ Samples
 =======
 
 Please see [doc/panama_jextract.md](doc/panama_jextract.md) for examples on how to use `jextract` to work with common native libraries.
+
+Note
+====
+
+This repo is foreign-abi-jrtfs experiment. This jrtfs implementation uses jextracted jimage.h and foreign-abi.
+The System property "use.foreign.jrtfs" can be set to true to make javac choose this jrtfs implementation
+instead of the regular jrtfs implementation. To use this jrtfs implementation in your code, you can use
+"jrtf:/" URI scheme instead of "jrt:/" scheme. 
+
+The System property "foreign.jrtfs.debug" can be set to true for debugging the foreign-jrtfs.
