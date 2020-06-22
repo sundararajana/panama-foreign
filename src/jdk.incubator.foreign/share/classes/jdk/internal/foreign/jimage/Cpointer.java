@@ -46,11 +46,6 @@ public final class Cpointer {
     private static final VarHandle handle = MemoryHandles.asAddressVarHandle(LAYOUT.varHandle(CARRIER));
     private static final VarHandle arrayHandle = MemoryHandles.asAddressVarHandle(arrayHandle(LAYOUT, CARRIER));
 
-    public static MemoryAddress asArrayRestricted(MemoryAddress addr, int numPointers) {
-        return MemorySegment.ofNativeRestricted(addr, numPointers * LAYOUT.byteSize(),
-               Thread.currentThread(), null, null).baseAddress();
-    }
-
     public static MemoryAddress asArray(MemoryAddress addr, int numPointers) {
         var seg = addr.segment();
         if (seg == null) {

@@ -50,11 +50,6 @@ public class Cchar {
     private static final VarHandle handle = LAYOUT.varHandle(CARRIER);
     private static final VarHandle arrayHandle = arrayHandle(LAYOUT, CARRIER);
 
-    public static MemoryAddress asArrayRestricted(MemoryAddress addr, int numElements) {
-        return MemorySegment.ofNativeRestricted(addr, numElements * LAYOUT.byteSize(),
-               Thread.currentThread(), null, null).baseAddress();
-    }
-
     public static MemoryAddress asArray(MemoryAddress addr, int numElements) {
         var seg = addr.segment();
         if (seg == null) {

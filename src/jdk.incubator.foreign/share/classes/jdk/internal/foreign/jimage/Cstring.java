@@ -81,7 +81,7 @@ public final class Cstring {
     }
 
     public static String toJavaStringRestricted(MemoryAddress addr) {
-        return CSupport.toJavaStringRestricted(addr);
+        return RuntimeHelper.toJavaStringRestricted(addr);
     }
 
     public static String toJavaString(MemoryAddress addr) {
