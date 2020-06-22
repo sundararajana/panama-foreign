@@ -35,6 +35,7 @@ import jdk.incubator.foreign.MemorySegment;
 import jdk.incubator.foreign.SequenceLayout;
 import jdk.incubator.foreign.ValueLayout;
 import jdk.internal.foreign.MemoryAddressImpl;
+import jdk.internal.foreign.NativeMemorySegmentImpl;
 import jdk.internal.foreign.Utils;
 import jdk.internal.foreign.abi.aarch64.AArch64Linker;
 import jdk.internal.foreign.abi.x64.sysv.SysVVaList;
@@ -46,6 +47,7 @@ import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.lang.invoke.VarHandle;
 import java.nio.ByteOrder;
+import java.nio.charset.Charset;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.IntStream;
@@ -255,6 +257,25 @@ public class SharedUtils {
             return AArch64Linker.getInstance();
         }
         throw new UnsupportedOperationException("Unsupported os or arch: " + os + ", " + arch);
+    }
+
+    private static int strlen(MemoryAddress address) {
+        // iterate until overflow (String can only hold a byte[], whose length can be expressed as an int)
+        for (int offset = 0; offset >= 0; offset++) {
+            byte curr = (byte) byteArrHandle.get(address, (long) offset);
+            if (curr == 0) {
+                return offset;
+            }
+        }
+        throw new IllegalArgumentException("String too large");
+    }
+
+    public static String toJavaStringInternal(MemoryAddress addr, Charset charset) {
+        int len = strlen(addr);
+        byte[] bytes = new byte[len];
+        MemorySegment.ofArray(bytes)
+                .copyFrom(NativeMemorySegmentImpl.makeNativeSegmentUnchecked(addr, len, null, null, null));
+        return new String(bytes, charset);
     }
 
     public static VaList newVaList(Consumer<VaList.Builder> actions) {

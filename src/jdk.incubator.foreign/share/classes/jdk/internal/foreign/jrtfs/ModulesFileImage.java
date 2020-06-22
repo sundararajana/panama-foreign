@@ -47,8 +47,8 @@ import java.util.function.Consumer;
 
 import static jdk.incubator.foreign.MemoryAddress.NULL;
 import static jdk.incubator.foreign.CSupport.toCString;
-import static jdk.incubator.foreign.CSupport.toJavaStringRestricted;
 import static jdk.internal.foreign.jimage.jimage_h.*;
+import static jdk.internal.foreign.jimage.RuntimeHelper.toJavaStringRestricted;
 
 public class ModulesFileImage extends SystemImage {
     private static boolean DEBUG = Boolean.parseBoolean(GetPropertyAction.privilegedGetProperty("foreign.jrtfs.debug"));
