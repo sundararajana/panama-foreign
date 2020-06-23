@@ -47,3 +47,7 @@ instead of the regular jrtfs implementation. To use this jrtfs implementation in
 "jrtf:/" URI scheme instead of "jrt:/" scheme. 
 
 The System property "foreign.jrtfs.debug" can be set to true for debugging the foreign-jrtfs.
+
+javac command line to use the new jrtfs is as follows:
+
+javac -J--add-modules=jdk.incubator.foreign -J-Duse.foreign.jrtfs=true Main.java
