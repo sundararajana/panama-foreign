@@ -91,6 +91,7 @@ public:
     _shared_pd = OopHandle();
     _loader_data = NULL;
     _reads = NULL;
+    _unnamed_native_packages = NULL;
     _version = NULL;
     _location = NULL;
     _can_read_all_unnamed = false;
