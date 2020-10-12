@@ -783,3 +783,31 @@ void Modules::add_module_exports_to_all_unnamed(jobject module, jstring package_
                        module_entry->name()->as_C_string());
   }
 }
+
+// Mark module as native
+void Modules::add_module_enable_native_access(jobject module, TRAPS) {
+  if (module == NULL) {
+    THROW_MSG(vmSymbols::java_lang_NullPointerException(),
+              "module is null");
+  }
+  ModuleEntry* module_entry = get_module_entry(module, CHECK);
+  if (module_entry == NULL) {
+    THROW_MSG(vmSymbols::java_lang_IllegalArgumentException(),
+              "module is invalid");
+  }
+
+  module_entry->set_is_native(true);
+
+  if (log_is_enabled(Debug, module)) {
+    ResourceMark rm(THREAD);
+    Symbol* name = module_entry->name();
+    log_debug(module)("add_module_enable_native_access(): module"
+                      " %s is marked as a native module",
+                       name == NULL ? UNNAMED_MODULE : name->as_C_string());
+  }
+}
+
+// Mark specific packages from ALL-UNNAMED modules for native access
+void Modules::enable_native_access_all_unnamed(jobjectArray packages, TRAPS) {
+  ModuleEntry::enable_native_access_all_unnamed(packages, CHECK);
+}

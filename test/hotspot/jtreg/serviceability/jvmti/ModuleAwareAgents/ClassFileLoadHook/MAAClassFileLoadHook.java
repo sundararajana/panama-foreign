@@ -32,16 +32,6 @@
 
 public class MAAClassFileLoadHook {
 
-    static {
-        try {
-            System.loadLibrary("MAAClassFileLoadHook");
-        } catch (UnsatisfiedLinkError ule) {
-            System.err.println("Could not load MAAClassFileLoadHook library");
-            System.err.println("java.library.path: "
-                + System.getProperty("java.library.path"));
-            throw ule;
-        }
-    }
 
     native static int check();
 

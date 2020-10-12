@@ -1088,6 +1088,8 @@ public:
     _method_InjectedProfile,
     _method_LambdaForm_Compiled,
     _method_Hidden,
+    _method_RestrictedNative,
+    _method_RestrictedJNI,
     _method_Scoped,
     _method_IntrinsicCandidate,
     _jdk_internal_vm_annotation_Contended,
@@ -2126,6 +2128,14 @@ AnnotationCollector::annotation_index(const ClassLoaderData* loader_data,
       if (!privileged)              break;  // only allow in privileged code
       return _method_Scoped;
     }
+    case VM_SYMBOL_ENUM_NAME(jdk_internal_vm_annotation_RestrictedNative_signature): {
+      if (_location != _in_method)  break;  // only allow for methods
+      return _method_RestrictedNative;
+    }
+    case VM_SYMBOL_ENUM_NAME(jdk_internal_vm_annotation_RestrictedJNI_signature): {
+      if (_location != _in_method)  break;  // only allow for methods
+      return _method_RestrictedJNI;
+    }
     case VM_SYMBOL_ENUM_NAME(jdk_internal_vm_annotation_IntrinsicCandidate_signature): {
       if (_location != _in_method)  break;  // only allow for methods
       if (!privileged)              break;  // only allow in privileged code
@@ -2188,6 +2198,10 @@ void MethodAnnotationCollector::apply_to(const methodHandle& m) {
     m->set_intrinsic_id(vmIntrinsics::_compiledLambdaForm);
   if (has_annotation(_method_Hidden))
     m->set_hidden(true);
+  if (has_annotation(_method_RestrictedNative))
+    m->set_restricted_native(true);
+  if (has_annotation(_method_RestrictedJNI))
+    m->set_restricted_jni(true);
   if (has_annotation(_method_Scoped))
     m->set_scoped(true);
   if (has_annotation(_method_IntrinsicCandidate) && !m->is_synthetic())

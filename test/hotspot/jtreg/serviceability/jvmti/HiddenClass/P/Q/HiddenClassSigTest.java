@@ -70,16 +70,6 @@ public class HiddenClassSigTest {
     static native void checkHiddenClassArray(Class array, String sig);
     static native boolean checkFailed(); // get native agent failing status
 
-    static {
-        try {
-            System.loadLibrary("HiddenClassSigTest");
-        } catch (UnsatisfiedLinkError ule) {
-            System.err.println("Could not load HiddenClassSigTest library");
-            System.err.println("java.library.path: "
-                + System.getProperty("java.library.path"));
-            throw ule;
-        }
-    }
 
     static Class<?> defineHiddenClass(String classFileName) throws Exception {
         Lookup lookup = MethodHandles.lookup();

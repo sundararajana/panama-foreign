@@ -39,13 +39,6 @@ public class GetLocalVars {
 
     public static
     void main(String[] args) throws Exception {
-        try {
-            System.loadLibrary(agentLib);
-        } catch (UnsatisfiedLinkError ex) {
-            System.err.println("Failed to load " + agentLib + " lib");
-            System.err.println("java.library.path: " + System.getProperty("java.library.path"));
-            throw ex;
-        }
         run(args);
         int status = getStatus();
         if (status != 0) {

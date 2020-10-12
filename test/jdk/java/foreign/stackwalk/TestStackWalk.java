@@ -33,19 +33,21 @@
  *   -XX:+UnlockDiagnosticVMOptions
  *   -XX:+WhiteBoxAPI
  *   -Djdk.internal.foreign.ProgrammableInvoker.USE_INTRINSICS=true
- *   -Dforeign.restricted=permit
+ *   --enable-native-access=ALL-UNNAMED/jdk.foreign.test
  *   -Xbatch
- *   TestStackWalk
+ *   jdk.foreign.test.TestStackWalk
  *
  * @run main/othervm
  *   -Xbootclasspath/a:.
  *   -XX:+UnlockDiagnosticVMOptions
  *   -XX:+WhiteBoxAPI
  *   -Djdk.internal.foreign.ProgrammableInvoker.USE_INTRINSICS=false
- *   -Dforeign.restricted=permit
+ *   --enable-native-access=ALL-UNNAMED/jdk.foreign.test
  *   -Xbatch
- *   TestStackWalk
+ *   jdk.foreign.test.TestStackWalk
  */
+
+package jdk.foreign.test;
 
 import jdk.incubator.foreign.CLinker;
 import jdk.incubator.foreign.FunctionDescriptor;

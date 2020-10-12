@@ -27,10 +27,12 @@
  * @run testng/othervm
  *   -Djdk.internal.foreign.ProgrammableInvoker.USE_SPEC=true
  *   -Djdk.internal.foreign.ProgrammableInvoker.USE_INTRINSICS=true
- *   -Dforeign.restricted=permit
+ *   --enable-native-access=ALL-UNNAMED/jdk.foreign.test
  *   -Xbatch
- *   TestIntrinsics
+ *   jdk.foreign.test.TestIntrinsics
  */
+
+package jdk.foreign.test;
 
 import jdk.incubator.foreign.CLinker;
 import jdk.incubator.foreign.FunctionDescriptor;

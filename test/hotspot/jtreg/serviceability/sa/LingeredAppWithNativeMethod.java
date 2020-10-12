@@ -33,10 +33,6 @@ public class LingeredAppWithNativeMethod extends LingeredApp {
     private static final int LOWER_BOUND = 40;
     private static final Random RNG = Utils.getRandomInstance();
 
-    static {
-        // JNI library compiled with no frame pointer info
-        System.loadLibrary("NoFramePointer");
-    }
 
     public void callNative() {
         // Call JNI code which does something compute

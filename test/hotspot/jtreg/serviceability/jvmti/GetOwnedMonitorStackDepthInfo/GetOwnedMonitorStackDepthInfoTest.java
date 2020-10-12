@@ -34,16 +34,6 @@
 
 public class GetOwnedMonitorStackDepthInfoTest {
 
-    static {
-        try {
-            System.loadLibrary("GetOwnedMonitorStackDepthInfoTest");
-        } catch (UnsatisfiedLinkError ule) {
-            System.err.println("Could not load GetOwnedMonitorStackDepthInfoTest library");
-            System.err.println("java.library.path: "
-                    + System.getProperty("java.library.path"));
-            throw ule;
-        }
-    }
 
     private static native int verifyOwnedMonitors();
 

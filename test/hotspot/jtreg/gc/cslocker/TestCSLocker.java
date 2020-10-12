@@ -26,7 +26,7 @@ package gc.cslocker;
 import static gc.testlibrary.Allocation.blackHole;
 
 /*
- * @test TestCSLocker
+ * @test
  * @bug 6186200
  * @library /
  * @summary This short test check RFE 6186200 changes. One thread locked

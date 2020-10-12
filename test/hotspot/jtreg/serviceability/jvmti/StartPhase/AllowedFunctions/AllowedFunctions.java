@@ -33,16 +33,6 @@
 
 public class AllowedFunctions {
 
-    static {
-        try {
-            System.loadLibrary("AllowedFunctions");
-        } catch (UnsatisfiedLinkError ule) {
-            System.err.println("Could not load AllowedFunctions library");
-            System.err.println("java.library.path: "
-                + System.getProperty("java.library.path"));
-            throw ule;
-        }
-    }
 
     native static int check();
 

@@ -36,16 +36,6 @@ import java.lang.instrument.Instrumentation;
 
 public class AddModuleReadsTest {
 
-    static {
-        try {
-            System.loadLibrary("AddModuleReadsTest");
-        } catch (UnsatisfiedLinkError ule) {
-            System.err.println("Could not load AddModuleReadsTest library");
-            System.err.println("java.library.path: "
-                + System.getProperty("java.library.path"));
-            throw ule;
-        }
-    }
 
     native static int check(Module unnamed, Module base, Module instrument);
 

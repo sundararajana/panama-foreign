@@ -92,15 +92,6 @@ public class CanGenerateAllClassHook {
 
             log("Test PASSED.");
         } else {
-            // this is test run
-            try {
-                System.loadLibrary(agentLib);
-            } catch (UnsatisfiedLinkError ex) {
-                System.err.println("Failed to load " + agentLib + " lib");
-                System.err.println("java.library.path: " + System.getProperty("java.library.path"));
-                throw ex;
-            }
-
             final int onLoadValue = getOnLoadClassHookAvail();
             final int liveValue = getClassHookAvail();
             // Possible values returned:

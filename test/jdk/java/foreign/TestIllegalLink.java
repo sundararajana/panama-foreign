@@ -25,8 +25,10 @@
 /*
  * @test
  * @requires ((os.arch == "amd64" | os.arch == "x86_64") & sun.arch.data.model == "64") | os.arch == "aarch64"
- * @run testng/othervm -Dforeign.restricted=permit TestIllegalLink
+ * @run testng/othervm --enable-native-access=ALL-UNNAMED/jdk.foreign.test jdk.foreign.test.TestIllegalLink
  */
+
+package jdk.foreign.test;
 
 import jdk.incubator.foreign.CLinker;
 import jdk.incubator.foreign.FunctionDescriptor;

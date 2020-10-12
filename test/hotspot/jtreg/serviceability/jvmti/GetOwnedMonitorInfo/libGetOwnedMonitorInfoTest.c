@@ -164,30 +164,6 @@ Agent_OnAttach(JavaVM *jvm, char *options, void *reserved) {
     return Agent_Initialize(jvm, options, reserved);
 }
 
-JNIEXPORT jint JNICALL
-JNI_OnLoad(JavaVM *jvm, void *reserved) {
-    jint res;
-    JNIEnv *env;
-
-    res = JNI_ENV_PTR(jvm)->GetEnv(JNI_ENV_ARG(jvm, (void **) &env),
-                                   JNI_VERSION_9);
-    if (res != JNI_OK || env == NULL) {
-        fprintf(stderr, "Error: GetEnv call failed(%d)!\n", res);
-        return JNI_ERR;
-    }
-
-    testClass = (*env)->FindClass(env, TEST_CLASS);
-    if (testClass != NULL) {
-      testClass = (*env)->NewGlobalRef(env, testClass);
-    }
-    if (testClass == NULL) {
-        fprintf(stderr, "Error: Could not load class %s!\n", TEST_CLASS);
-        return JNI_ERR;
-    }
-
-    return JNI_VERSION_9;
-}
-
 static
 jint Agent_Initialize(JavaVM *jvm, char *options, void *reserved) {
     jint res;
@@ -272,6 +248,21 @@ Java_GetOwnedMonitorInfoTest_check(JNIEnv *env, jclass cls) {
 JNIEXPORT jboolean JNICALL
 Java_GetOwnedMonitorInfoTest_hasEventPosted(JNIEnv *env, jclass cls) {
     return event_has_posted;
+}
+
+JNIEXPORT jint JNICALL
+Java_GetOwnedMonitorInfoTest_init(JNIEnv *env, jclass cls) {
+
+    testClass = (*env)->FindClass(env, TEST_CLASS);
+    if (testClass != NULL) {
+      testClass = (*env)->NewGlobalRef(env, testClass);
+    }
+    if (testClass == NULL) {
+        fprintf(stderr, "Error: Could not load class %s!\n", TEST_CLASS);
+        return JNI_ERR;
+    }
+
+    return JNI_VERSION_9;
 }
 
 #ifdef __cplusplus

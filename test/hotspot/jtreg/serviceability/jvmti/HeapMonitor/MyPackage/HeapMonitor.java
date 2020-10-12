@@ -36,16 +36,6 @@ public class HeapMonitor {
   private static int[][] arrays;
   private static int allocationIterations = 1000;
 
-  static {
-    try {
-      System.loadLibrary("HeapMonitorTest");
-    } catch (UnsatisfiedLinkError ule) {
-      System.err.println("Could not load HeapMonitor library");
-      System.err.println("java.library.path: " + System.getProperty("java.library.path"));
-      throw ule;
-    }
-  }
-
   /** Set a specific sampling interval, 0 samples every allocation. */
   public native static void setSamplingInterval(int interval);
   public native static void enableSamplingEvents();
@@ -61,7 +51,7 @@ public class HeapMonitor {
     int sum = 0;
     List<Frame> frames = new ArrayList<Frame>();
     allocate(frames);
-    frames.add(new Frame("allocate", "()Ljava/util/List;", "HeapMonitor.java", 63));
+    frames.add(new Frame("allocate", "()Ljava/util/List;", "HeapMonitor.java", 53));
     return frames;
   }
 
@@ -70,8 +60,8 @@ public class HeapMonitor {
     for (int j = 0; j < allocationIterations; j++) {
       sum += actuallyAllocate();
     }
-    frames.add(new Frame("actuallyAllocate", "()I", "HeapMonitor.java", 98));
-    frames.add(new Frame("allocate", "(Ljava/util/List;)V", "HeapMonitor.java", 71));
+    frames.add(new Frame("actuallyAllocate", "()I", "HeapMonitor.java", 88));
+    frames.add(new Frame("allocate", "(Ljava/util/List;)V", "HeapMonitor.java", 61));
   }
 
   public static List<Frame> repeatAllocate(int max) {
@@ -79,7 +69,7 @@ public class HeapMonitor {
     for (int i = 0; i < max; i++) {
       frames = allocate();
     }
-    frames.add(new Frame("repeatAllocate", "(I)Ljava/util/List;", "HeapMonitor.java", 80));
+    frames.add(new Frame("repeatAllocate", "(I)Ljava/util/List;", "HeapMonitor.java", 70));
     return frames;
   }
 
@@ -119,7 +109,7 @@ public class HeapMonitor {
     List<Frame> frameList = allocate();
     disableSamplingEvents();
 
-    frameList.add(new Frame("calculateOneElementSize", "()V", "HeapMonitor.java", 119));
+    frameList.add(new Frame("calculateOneElementSize", "()V", "HeapMonitor.java", 109));
     Frame[] frames = frameList.toArray(new Frame[0]);
 
     // Get the actual size.
@@ -201,7 +191,7 @@ public class HeapMonitor {
 
     List<Frame> frameList = allocate();
     frameList.add(new Frame("allocateAndCheckFrames", "(ZZ)[LMyPackage/Frame;", "HeapMonitor.java",
-          202));
+          192));
     Frame[] frames = frameList.toArray(new Frame[0]);
 
     boolean foundLive = obtainedEvents(frames);

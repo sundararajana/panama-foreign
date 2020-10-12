@@ -25,8 +25,10 @@
  * @test
  * @modules java.base/jdk.internal.ref
  *          jdk.incubator.foreign/jdk.incubator.foreign
- * @run testng/othervm -Dforeign.restricted=permit TestCleaner
+ * @run testng/othervm --enable-native-access=ALL-UNNAMED/jdk.foreign.test jdk.foreign.test.TestCleaner
  */
+
+package jdk.foreign.test;
 
 import jdk.incubator.foreign.MemorySegment;
 import java.lang.ref.Cleaner;

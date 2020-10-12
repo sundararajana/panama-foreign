@@ -25,8 +25,10 @@
  * @test
  * @requires ((os.arch == "amd64" | os.arch == "x86_64") & sun.arch.data.model == "64") | os.arch == "aarch64"
  * @modules jdk.incubator.foreign/jdk.internal.foreign
- * @run testng/othervm -Dforeign.restricted=permit TestLibraryLookup
+ * @run testng/othervm --enable-native-access=ALL-UNNAMED/jdk.foreign.test jdk.foreign.test.TestLibraryLookup
  */
+
+package jdk.foreign.test;
 
 import jdk.incubator.foreign.LibraryLookup;
 import jdk.incubator.foreign.MemoryAddress;
@@ -108,7 +110,7 @@ public class TestLibraryLookup {
         List<URLClassLoader> loaders = new ArrayList<>();
         for (int i = 0 ; i < 5 ; i++) {
             URLClassLoader loader = new LocalLoader();
-            Class<?> clazz = loader.loadClass("TestLibraryLookup$Holder");
+            Class<?> clazz = loader.loadClass("jdk.foreign.test.TestLibraryLookup$Holder");
             Field field = clazz.getField("lookup");
             field.setAccessible(true);
             field.get(null); //make sure <clinit> is run

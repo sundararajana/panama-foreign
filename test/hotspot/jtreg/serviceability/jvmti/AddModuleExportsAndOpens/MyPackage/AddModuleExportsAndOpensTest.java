@@ -35,16 +35,6 @@ import java.io.PrintStream;
 
 public class AddModuleExportsAndOpensTest {
 
-    static {
-        try {
-            System.loadLibrary("AddModuleExportsAndOpensTest");
-        } catch (UnsatisfiedLinkError ule) {
-            System.err.println("Could not load AddModuleExportsAndOpensTest library");
-            System.err.println("java.library.path: "
-                + System.getProperty("java.library.path"));
-            throw ule;
-        }
-    }
 
     native static int check(Module baseModule, Module thisModule);
 

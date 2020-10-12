@@ -559,6 +559,7 @@ public final class Method extends Executable {
             checkAccess(caller, clazz,
                         Modifier.isStatic(modifiers) ? null : obj.getClass(),
                         modifiers);
+            checkRestricted(this, caller);
         }
         MethodAccessor ma = methodAccessor;             // read volatile
         if (ma == null) {

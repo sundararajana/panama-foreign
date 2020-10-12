@@ -36,16 +36,10 @@ import java.io.PrintStream;
 public class GetOwnedMonitorInfoTest {
 
     static {
-        try {
-            System.loadLibrary("GetOwnedMonitorInfoTest");
-        } catch (UnsatisfiedLinkError ule) {
-            System.err.println("Could not load GetOwnedMonitorInfoTest library");
-            System.err.println("java.library.path: "
-                               + System.getProperty("java.library.path"));
-            throw ule;
-        }
+        init();
     }
 
+    private static native int init();
     private static native int check();
     private static native boolean hasEventPosted();
 

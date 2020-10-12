@@ -40,6 +40,7 @@ import java.net.URI;
 import java.net.URL;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -56,8 +57,8 @@ import jdk.internal.loader.BuiltinClassLoader;
 import jdk.internal.loader.BootLoader;
 import jdk.internal.loader.ClassLoaders;
 import jdk.internal.misc.CDS;
-import jdk.internal.misc.VM;
 import jdk.internal.module.IllegalAccessLogger;
+import jdk.internal.module.IllegalNativeAccessChecker;
 import jdk.internal.module.ModuleLoaderMap;
 import jdk.internal.module.ServicesCatalog;
 import jdk.internal.module.Resources;
@@ -110,6 +111,9 @@ public final class Module implements AnnotatedElement {
     // the module descriptor
     private final ModuleDescriptor descriptor;
 
+    // is this module a native module
+    private boolean enableNativeAccess = false;
+
 
     /**
      * Creates a new named Module. The resulting Module will be defined to the
@@ -134,6 +138,10 @@ public final class Module implements AnnotatedElement {
         String loc = Objects.toString(uri, null);
         Object[] packages = descriptor.packages().toArray();
         defineModule0(this, isOpen, vs, loc, packages);
+        if (loader == null || loader instanceof BuiltinClassLoader) {
+            // boot/builtin modules are always native
+            addEnableNativeAccess();
+        }
     }
 
 
@@ -242,6 +250,10 @@ public final class Module implements AnnotatedElement {
             }
         }
         return null;
+    }
+
+    boolean isEnableNativeAccess() {
+        return enableNativeAccess;
     }
 
     // --
@@ -407,6 +419,19 @@ public final class Module implements AnnotatedElement {
             implAddReads(other, true);
         }
         return this;
+    }
+
+    Module addEnableNativeAccess() {
+        enableNativeAccess = true;
+        addEnableNativeAccess0(this);
+        return this;
+    }
+
+    static void enableNativeAccessAllUnnamed() {
+        Collection<String> packages = IllegalNativeAccessChecker.enableNativeAccessAllUnnamedPackages();
+        if (!packages.isEmpty()) {
+            enableNativeAccessAllUnnamed0(packages.toArray(new String[0]));
+        }
     }
 
     /**
@@ -1265,7 +1290,7 @@ public final class Module implements AnnotatedElement {
                                      ResolvedModule resolvedModule) {
         Configuration cf = resolvedModule.configuration();
         String dn = resolvedModule.name();
-        return parent.layers()
+        return parent.layers().stream()
                 .filter(l -> l.configuration() == cf)
                 .findAny()
                 .map(layer -> {
@@ -1719,4 +1744,9 @@ public final class Module implements AnnotatedElement {
 
     // JVM_AddModuleExportsToAllUnnamed
     private static native void addExportsToAllUnnamed0(Module from, String pn);
+
+    // JVM_AddPermitsNative
+    private static native void addEnableNativeAccess0(Module from);
+
+    private static native void enableNativeAccessAllUnnamed0(Object[] packages);
 }

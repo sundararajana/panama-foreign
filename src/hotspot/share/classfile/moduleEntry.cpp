@@ -28,6 +28,7 @@
 #include "classfile/classLoaderData.inline.hpp"
 #include "classfile/javaClasses.inline.hpp"
 #include "classfile/moduleEntry.hpp"
+#include "classfile/symbolTable.hpp"
 #include "logging/log.hpp"
 #include "memory/archiveBuilder.hpp"
 #include "memory/archiveUtils.hpp"
@@ -39,6 +40,7 @@
 #include "oops/oopHandle.inline.hpp"
 #include "oops/symbol.hpp"
 #include "runtime/handles.inline.hpp"
+#include "runtime/jniHandles.inline.hpp"
 #include "runtime/safepoint.hpp"
 #include "utilities/events.hpp"
 #include "utilities/growableArray.hpp"
@@ -209,6 +211,12 @@ void ModuleEntry::set_is_open(bool is_open) {
   _is_open = is_open;
 }
 
+// Set whether the module is native, i.e. restricted native operations are allowed by clients in this module
+void ModuleEntry::set_is_native(bool is_native) {
+  assert_lock_strong(Module_lock);
+  _is_native = is_native;
+}
+
 // Returns true if the module has a non-empty reads list. As such, the unnamed
 // module will return false.
 bool ModuleEntry::has_reads_list() const {
@@ -358,6 +366,7 @@ ModuleEntryTable::~ModuleEntryTable() {
       if (to_remove->location() != NULL) {
         to_remove->location()->decrement_refcount();
       }
+      to_remove->delete_unnamed_native_packages();
 
       // Unlink from the Hashtable prior to freeing
       unlink_entry(to_remove);
@@ -746,4 +755,80 @@ void ModuleEntryTable::verify() {
 
 void ModuleEntry::verify() {
   guarantee(loader_data() != NULL, "A module entry must be associated with a loader.");
+}
+
+void ModuleEntry::check_native_module(Symbol* exception_symbol, Symbol* package_name, TRAPS) {
+  if (!is_native() && !is_unnamed_native_package(package_name)) {
+    ResourceMark rm(THREAD);
+    stringStream ss;
+    ss.print("Illegal native access from module: %s",
+            name() == NULL ? UNNAMED_MODULE : name()->as_C_string());
+    THROW_MSG(vmSymbols::java_lang_IllegalAccessException(), ss.as_string());
+  }
+}
+
+void ModuleEntry::warn_native_module(Symbol* exception_symbol, Symbol* package_name, TRAPS) {
+  if (!is_native() && !is_unnamed_native_package(package_name)) {
+    ResourceMark rm(THREAD);
+    stringStream ss;
+    ss.print("Illegal native access from module: %s",
+            name() == NULL ? UNNAMED_MODULE : name()->as_C_string());
+    // FIXME: revisit this way of warning
+    log_warning(logging)("WARNING: %s", ss.as_string());
+  }
+}
+
+void ModuleEntry::enable_native_access_all_unnamed(jobjectArray packages, TRAPS) {
+  ModuleEntryTable::javabase_moduleEntry()->enable_native_access_all_unnamed_impl(packages, CHECK);
+}
+
+void ModuleEntry::enable_native_access_all_unnamed_impl(jobjectArray packages, TRAPS) {
+  assert(this == _javabase_module);
+  MutexLocker m1(Module_lock);
+
+  objArrayHandle packages_h(THREAD, objArrayOop(JNIHandles::resolve(packages)));
+  int num_packages = (packages_h.is_null() ? 0 : packages_h->length());
+
+  if (_unnamed_native_packages == NULL) {
+    _unnamed_native_packages = new (ResourceObj::C_HEAP, mtModule) GrowableArray<Symbol*>(num_packages, mtModule);
+  }
+
+  char buf[128];
+  for (int x = 0; x < num_packages; x++) {
+    oop pkg_str = packages_h->obj_at(x);
+
+    if (pkg_str == NULL || pkg_str->klass() != SystemDictionary::String_klass()) {
+      THROW_MSG(vmSymbols::java_lang_IllegalArgumentException(),
+                err_msg("Bad package name"));
+    }
+
+    int package_len;
+    char* package_name = java_lang_String::as_utf8_string_full(pkg_str, buf, sizeof(buf), package_len);
+
+    Symbol* pkg_symbol = SymbolTable::new_symbol(package_name, package_len);
+    _unnamed_native_packages->append(pkg_symbol);
+  }
+}
+
+void ModuleEntry::delete_unnamed_native_packages() {
+  delete _unnamed_native_packages;
+  _unnamed_native_packages = NULL;
+}
+
+bool ModuleEntry::is_unnamed_native_package(Symbol* package_name) const {
+  if (is_named() || package_name == NULL) {
+    return false;
+  }
+
+  GrowableArray<Symbol*>* native_pkgs = ModuleEntryTable::javabase_moduleEntry()->_unnamed_native_packages;
+  if (native_pkgs != NULL) {
+   int len = native_pkgs->length();
+   for (int idx = 0; idx < len; idx++) {
+     if (native_pkgs->at(idx) == package_name) {
+       return true;
+     }
+   }
+  }
+
+  return false;
 }

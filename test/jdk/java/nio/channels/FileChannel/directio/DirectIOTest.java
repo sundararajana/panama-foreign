@@ -28,7 +28,7 @@
  * @requires (os.family == "linux" | os.family == "aix")
  * @library /test/lib
  * @build jdk.test.lib.Platform
- * @run main/native DirectIOTest
+ * @run main/othervm/native DirectIOTest
  */
 
 import java.io.*;

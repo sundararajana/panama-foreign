@@ -26,29 +26,31 @@
  * @test
  * @requires ((os.arch == "amd64" | os.arch == "x86_64") & sun.arch.data.model == "64") | os.arch == "aarch64"
  * @modules jdk.incubator.foreign/jdk.internal.foreign
- * @build NativeTestHelper CallGeneratorHelper TestUpcall
+ * @build jdk.foreign.test.NativeTestHelper jdk.foreign.test.CallGeneratorHelper jdk.foreign.test.TestUpcall
  *
  * @run testng/othervm
- *   -Dforeign.restricted=permit
+ *   --enable-native-access=ALL-UNNAMED/jdk.foreign.test
  *   -Djdk.internal.foreign.ProgrammableInvoker.USE_SPEC=false
  *   -Djdk.internal.foreign.ProgrammableInvoker.USE_INTRINSICS=false
- *   TestUpcall
+ *   jdk.foreign.test.TestUpcall
  * @run testng/othervm
- *   -Dforeign.restricted=permit
+ *   --enable-native-access=ALL-UNNAMED/jdk.foreign.test
  *   -Djdk.internal.foreign.ProgrammableInvoker.USE_SPEC=true
  *   -Djdk.internal.foreign.ProgrammableInvoker.USE_INTRINSICS=false
- *   TestUpcall
+ *   jdk.foreign.test.TestUpcall
  * @run testng/othervm
- *   -Dforeign.restricted=permit
+ *   --enable-native-access=ALL-UNNAMED/jdk.foreign.test
  *   -Djdk.internal.foreign.ProgrammableInvoker.USE_SPEC=false
  *   -Djdk.internal.foreign.ProgrammableInvoker.USE_INTRINSICS=true
- *   TestUpcall
+ *   jdk.foreign.test.TestUpcall
  * @run testng/othervm
- *   -Dforeign.restricted=permit
+ *   --enable-native-access=ALL-UNNAMED/jdk.foreign.test
  *   -Djdk.internal.foreign.ProgrammableInvoker.USE_SPEC=true
  *   -Djdk.internal.foreign.ProgrammableInvoker.USE_INTRINSICS=true
- *   TestUpcall
+ *   jdk.foreign.test.TestUpcall
  */
+
+package jdk.foreign.test;
 
 import jdk.incubator.foreign.CLinker;
 import jdk.incubator.foreign.FunctionDescriptor;

@@ -68,6 +68,7 @@ private:
                                        // for shared classes from this module
   ClassLoaderData* _loader_data;
   GrowableArray<ModuleEntry*>* _reads; // list of modules that are readable by this module
+  GrowableArray<Symbol*>* _unnamed_native_packages; // packages from ALL-UNNAMED packages that are native enabled
   Symbol* _version;                    // module version number
   Symbol* _location;                   // module location
   CDS_ONLY(int _shared_path_index;)    // >=0 if classes in this module are in CDS archive
@@ -75,11 +76,14 @@ private:
   bool _has_default_read_edges;        // JVMTI redefine/retransform support
   bool _must_walk_reads;               // walk module's reads list at GC safepoints to purge out dead modules
   bool _is_open;                       // whether the packages in the module are all unqualifiedly exported
+  bool _is_native;                     // whether the module is native via --enable-native-access
   bool _is_patched;                    // whether the module is patched via --patch-module
   CDS_JAVA_HEAP_ONLY(int _archived_module_index;)
 
   JFR_ONLY(DEFINE_TRACE_ID_FIELD;)
   enum {MODULE_READS_SIZE = 101};      // Initial size of list of modules that the module can read.
+
+  void enable_native_access_all_unnamed_impl(jobjectArray packages, TRAPS);
 
 public:
   void init() {
@@ -94,6 +98,7 @@ public:
     _must_walk_reads = false;
     _is_patched = false;
     _is_open = false;
+    _is_native = false;
     CDS_ONLY(_shared_path_index = -1);
   }
 
@@ -132,7 +137,11 @@ public:
   void             set_read_walk_required(ClassLoaderData* m_loader_data);
 
   bool             is_open() const                     { return _is_open; }
+  bool             is_native() const                   { return _is_native; }
+  bool             is_unnamed_native_package(Symbol* package_name) const;
+
   void             set_is_open(bool is_open);
+  void             set_is_native(bool is_native);
 
   bool             is_named() const                    { return (name() != NULL); }
 
@@ -184,6 +193,11 @@ public:
   static ModuleEntry* create_boot_unnamed_module(ClassLoaderData* cld);
   static ModuleEntry* new_unnamed_module_entry(Handle module_handle, ClassLoaderData* cld);
   void delete_unnamed_module();
+
+  void check_native_module(Symbol* exception_symbol, Symbol* package_name, TRAPS);
+  void warn_native_module(Symbol* exception_symbol, Symbol* package_name, TRAPS);
+  static void enable_native_access_all_unnamed(jobjectArray packages, TRAPS);
+  void delete_unnamed_native_packages();
 
   void print(outputStream* st = tty);
   void verify();

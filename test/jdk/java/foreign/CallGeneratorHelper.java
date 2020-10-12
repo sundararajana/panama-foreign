@@ -22,6 +22,8 @@
  *
  */
 
+package jdk.foreign.test;
+
 import jdk.incubator.foreign.GroupLayout;
 import jdk.incubator.foreign.MemoryAddress;
 import jdk.incubator.foreign.MemoryLayout;

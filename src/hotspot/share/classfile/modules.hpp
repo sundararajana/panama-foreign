@@ -114,6 +114,11 @@ public:
   // module then IllegalArgumentException is thrown.
   static void add_module_exports_to_all_unnamed(jobject module, jstring package, TRAPS);
 
+  // Mark the module as native
+  static void add_module_enable_native_access(jobject module, TRAPS);
+  // Mark specific packages from ALL-UNNAMED modules for native access
+  static void enable_native_access_all_unnamed(jobjectArray packages, TRAPS);
+
   // Return TRUE iff package is defined by loader
   static bool is_package_defined(Symbol* package_name, Handle h_loader, TRAPS);
   static ModuleEntryTable* get_module_entry_table(Handle h_loader);

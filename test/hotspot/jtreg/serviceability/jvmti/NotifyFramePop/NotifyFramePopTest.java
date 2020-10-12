@@ -33,16 +33,6 @@
 import jtreg.SkippedException;
 
 public class NotifyFramePopTest {
-    static {
-        try {
-            System.loadLibrary("NotifyFramePopTest");
-        } catch (UnsatisfiedLinkError ex) {
-            System.err.println("Could not load NotifyFramePopTest library");
-            System.err.println("java.library.path:"
-                + System.getProperty("java.library.path"));
-            throw ex;
-        }
-    }
 
     public static void main(String args[]) {
         if (!canGenerateFramePopEvents()) {

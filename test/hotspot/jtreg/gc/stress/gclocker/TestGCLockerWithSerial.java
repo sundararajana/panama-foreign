@@ -25,7 +25,7 @@
 package gc.stress.gclocker;
 
 /*
- * @test TestGCLockerWithSerial
+ * @test
  * @library /
  * @requires vm.gc.Serial
  * @requires vm.flavor != "minimal"

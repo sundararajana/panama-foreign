@@ -22,6 +22,8 @@
  *
  */
 
+package jdk.foreign.test;
+
 import jdk.incubator.foreign.CLinker;
 import jdk.incubator.foreign.MemoryLayout;
 

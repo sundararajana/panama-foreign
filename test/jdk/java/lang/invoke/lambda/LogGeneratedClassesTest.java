@@ -28,7 +28,7 @@
  * @library /java/nio/file
  * @modules jdk.compiler
  *          jdk.zipfs
- * @run testng LogGeneratedClassesTest
+ * @run testng/othervm LogGeneratedClassesTest
  */
 import java.io.File;
 import java.io.IOException;

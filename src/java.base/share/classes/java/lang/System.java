@@ -37,7 +37,6 @@ import java.io.UnsupportedEncodingException;
 import java.lang.annotation.Annotation;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodType;
-import java.lang.invoke.StringConcatFactory;
 import java.lang.module.ModuleDescriptor;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
@@ -63,7 +62,6 @@ import java.util.function.Supplier;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
-import jdk.internal.misc.Unsafe;
 import jdk.internal.util.StaticProperty;
 import jdk.internal.module.ModuleBootstrap;
 import jdk.internal.module.ServicesCatalog;
@@ -77,6 +75,7 @@ import jdk.internal.logger.LazyLoggers;
 import jdk.internal.logger.LocalizedLoggerWrapper;
 import jdk.internal.util.SystemProps;
 import jdk.internal.vm.annotation.IntrinsicCandidate;
+import jdk.internal.vm.annotation.RestrictedJNI;
 import jdk.internal.vm.annotation.Stable;
 import sun.nio.fs.DefaultFileSystemProvider;
 import sun.reflect.annotation.AnnotationType;
@@ -1853,6 +1852,7 @@ public final class System {
      * @see        java.lang.SecurityManager#checkLink(java.lang.String)
      */
     @CallerSensitive
+    @RestrictedJNI
     public static void load(String filename) {
         Runtime.getRuntime().load0(Reflection.getCallerClass(), filename);
     }
@@ -1889,6 +1889,7 @@ public final class System {
      * @see        java.lang.SecurityManager#checkLink(java.lang.String)
      */
     @CallerSensitive
+    @RestrictedJNI
     public static void loadLibrary(String libname) {
         Runtime.getRuntime().loadLibrary0(Reflection.getCallerClass(), libname);
     }
@@ -2255,7 +2256,7 @@ public final class System {
                 layer.bindToLoader(loader);
             }
             public Stream<ModuleLayer> layers(ModuleLayer layer) {
-                return layer.layers();
+                return layer.layers().stream();
             }
             public Stream<ModuleLayer> layers(ClassLoader loader) {
                 return ModuleLayer.layers(loader);
@@ -2299,6 +2300,16 @@ public final class System {
 
             public Object classData(Class<?> c) {
                 return c.getClassData();
+            }
+
+            @Override
+            public Module addEnableNativeAccess(Module m) {
+                return m.addEnableNativeAccess();
+            }
+
+            @Override
+            public boolean isNative(Module m) {
+                return m.isEnableNativeAccess();
             }
         });
     }

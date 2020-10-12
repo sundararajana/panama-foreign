@@ -51,14 +51,6 @@ public class SuspendWithCurrentThread {
     private static int suspenderIndex;
 
     public static void main(String args[]) throws Exception {
-        try {
-            System.loadLibrary(AGENT_LIB);
-            log("Loaded library: " + AGENT_LIB);
-        } catch (UnsatisfiedLinkError ule) {
-            log("Failed to load library: " + AGENT_LIB);
-            log("java.library.path: " + System.getProperty("java.library.path"));
-            throw ule;
-        }
         if (args.length != 1) {
             throw new RuntimeException("Main: wrong arguments count: " + args.length + ", expected: 1");
         }

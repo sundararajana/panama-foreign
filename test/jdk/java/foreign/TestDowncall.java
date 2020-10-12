@@ -29,26 +29,28 @@
  * @build NativeTestHelper CallGeneratorHelper TestDowncall
  *
  * @run testng/othervm
- *   -Dforeign.restricted=permit
+ *   --enable-native-access=ALL-UNNAMED/jdk.foreign.test
  *   -Djdk.internal.foreign.ProgrammableInvoker.USE_SPEC=false
  *   -Djdk.internal.foreign.ProgrammableInvoker.USE_INTRINSICS=false
- *   TestDowncall
+ *   jdk.foreign.test.TestDowncall
  * @run testng/othervm
- *   -Dforeign.restricted=permit
+ *   --enable-native-access=ALL-UNNAMED/jdk.foreign.test
  *   -Djdk.internal.foreign.ProgrammableInvoker.USE_SPEC=true
  *   -Djdk.internal.foreign.ProgrammableInvoker.USE_INTRINSICS=false
- *   TestDowncall
+ *   jdk.foreign.test.TestDowncall
  * @run testng/othervm
- *   -Dforeign.restricted=permit
+ *   --enable-native-access=ALL-UNNAMED/jdk.foreign.test
  *   -Djdk.internal.foreign.ProgrammableInvoker.USE_SPEC=false
  *   -Djdk.internal.foreign.ProgrammableInvoker.USE_INTRINSICS=true
- *   TestDowncall
+ *   jdk.foreign.test.TestDowncall
  * @run testng/othervm
- *   -Dforeign.restricted=permit
+ *   --enable-native-access=ALL-UNNAMED/jdk.foreign.test
  *   -Djdk.internal.foreign.ProgrammableInvoker.USE_SPEC=true
  *   -Djdk.internal.foreign.ProgrammableInvoker.USE_INTRINSICS=true
- *   TestDowncall
+ *   jdk.foreign.test.TestDowncall
  */
+
+package jdk.foreign.test;
 
 import jdk.incubator.foreign.CLinker;
 import jdk.incubator.foreign.FunctionDescriptor;

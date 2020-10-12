@@ -39,15 +39,6 @@ import java.util.Arrays;
 
 public class OverpassMethods {
 
-    static {
-        try {
-            System.loadLibrary("OverpassMethods");
-        } catch (UnsatisfiedLinkError ex) {
-            System.err.println("Could not load OverpassMethods library");
-            System.err.println("java.library.path:" + System.getProperty("java.library.path"));
-            throw ex;
-        }
-    }
 
     static private void log(Object msg) {
         System.out.println(String.valueOf(msg));

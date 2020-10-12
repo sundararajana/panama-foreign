@@ -25,6 +25,7 @@
 #include "precompiled.hpp"
 #include "classfile/javaClasses.hpp"
 #include "classfile/symbolTable.hpp"
+#include "classfile/moduleEntry.hpp"
 #include "classfile/systemDictionary.hpp"
 #include "classfile/vmSymbols.hpp"
 #include "logging/log.hpp"
@@ -300,6 +301,7 @@ address NativeLookup::lookup_style(const methodHandle& method, char* pure_name, 
                          loader,
                          name_arg,
                          CHECK_NULL);
+
   entry = (address) (intptr_t) result.get_jlong();
 
   if (entry == NULL) {
@@ -311,6 +313,9 @@ address NativeLookup::lookup_style(const methodHandle& method, char* pure_name, 
         return entry;
       }
     }
+  } else {
+    ModuleEntry* module = method->method_holder()->module();
+    module->warn_native_module(vmSymbols::java_lang_UnsatisfiedLinkError(), klass->name(), CHECK_NULL);
   }
 
   return entry;

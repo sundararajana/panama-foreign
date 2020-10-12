@@ -38,16 +38,6 @@ import java.lang.TestProvider;
 
 public class AddModuleUsesAndProvidesTest {
 
-    static {
-        try {
-            System.loadLibrary("AddModuleUsesAndProvidesTest");
-        } catch (UnsatisfiedLinkError ule) {
-            System.err.println("Could not load AddModuleUsesAndProvidesTest library");
-            System.err.println("java.library.path: "
-                + System.getProperty("java.library.path"));
-            throw ule;
-        }
-    }
 
     native static int checkUses(Module baseModule, Class<?> service);
     native static int checkProvides(Module baseModule, Class<?> service, Class<?> serviceImpl);

@@ -30,8 +30,10 @@
  *          jdk.incubator.foreign/jdk.internal.foreign.abi.aarch64
  *          jdk.incubator.foreign/jdk.internal.foreign.abi.x64.windows
  *          jdk.incubator.foreign/jdk.internal.foreign.abi.x64.sysv
- * @run testng/othervm -Dforeign.restricted=permit VaListTest
+ * @run testng/othervm --enable-native-access=ALL-UNNAMED/jdk.foreign.test jdk.foreign.test.VaListTest
  */
+
+package jdk.foreign.test;
 
 import jdk.incubator.foreign.*;
 import jdk.incubator.foreign.CLinker.VaList;

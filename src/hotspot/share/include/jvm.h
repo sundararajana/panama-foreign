@@ -492,6 +492,18 @@ JNIEXPORT void JNICALL
 JVM_AddModuleExportsToAllUnnamed(JNIEnv *env, jobject from_module, jstring package);
 
 /*
+ * Mark the module as native, so that access to restricted native operations is allowed.
+ */
+JNIEXPORT void JNICALL
+JVM_AddModuleEnableNativeAccess(JNIEnv *env, jobject from_module);
+
+/*
+ * Enable native access from specified packages of all unnamed modules
+ */
+JNIEXPORT void JNICALL
+JVM_EnableNativeAccessAllUnnamed(JNIEnv *env, jobjectArray packages);
+
+/*
  * Do an unqualified export of a package.
  *  from_module: module containing the package to export
  *  package:     name of the package to export
