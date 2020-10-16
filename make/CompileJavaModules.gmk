@@ -40,7 +40,7 @@ $(eval $(call IncludeCustomExtension, CompileJavaModules.gmk))
 java.base_DOCLINT += -Xdoclint:all/protected,-reference,-accessibility \
     '-Xdoclint/package:java.*,javax.*'
 java.base_JAVAC_FLAGS += -XDstringConcat=inline
-java.base_JAVAC_FLAGS += -Xplugin:"panama"
+java.base_JAVAC_FLAGS += -Xplugin:"panama $(SUPPORT_OUTPUTDIR)/link_opt/restricted_native_methods.txt"
 java.base_COPY += .icu .dat .spp .nrm content-types.properties \
     hijrah-config-Hijrah-umalqura_islamic-umalqura.properties
 java.base_CLEAN += intrinsic.properties
@@ -389,7 +389,7 @@ jdk.jpackage_CLEAN += .properties
 
 ################################################################################
 
-jdk.incubator.foreign_JAVAC_FLAGS += -Xplugin:"panama"
+jdk.incubator.foreign_JAVAC_FLAGS += -Xplugin:"panama $(SUPPORT_OUTPUTDIR)/link_opt/restricted_native_methods.txt"
 
 ################################################################################
 

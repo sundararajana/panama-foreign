@@ -25,6 +25,13 @@
 
 package build.tools.panama;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.UncheckedIOException;
+import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.List;
 import com.sun.source.tree.CompilationUnitTree;
 import com.sun.source.tree.MethodTree;
 import com.sun.source.util.JavacTask;
@@ -32,15 +39,20 @@ import com.sun.source.util.Plugin;
 import com.sun.source.util.TaskEvent;
 import com.sun.source.util.TaskEvent.Kind;
 import com.sun.source.util.TaskListener;
+import com.sun.source.util.TreePath;
 import com.sun.source.util.TreePathScanner;
 import com.sun.source.util.Trees;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.tools.Diagnostic;
+import static java.nio.file.StandardOpenOption.*;
 
 public class RestrictedMethodsFinder implements Plugin {
+    private static final boolean DEBUG = Boolean.getBoolean("panama.javac.plugin.debug");
     private static final String RESTRICTED_NATIVE = "jdk.internal.vm.annotation.RestrictedNative";
     private static final String RESTRICTED_JNI = "jdk.internal.vm.annotation.RestrictedJNI";
+
+    private final List<String> declarations = new ArrayList<>();
 
     @Override
     public void init(JavacTask task, String... args) {
@@ -53,15 +65,38 @@ public class RestrictedMethodsFinder implements Plugin {
                     new TreePathScanner<Void, Void>() {
                         @Override
                         public Void visitMethod(MethodTree node, Void p) {
-                            Element el = trees.getElement(getCurrentPath());
+                            TreePath curPath = getCurrentPath();
+                            Element el = trees.getElement(curPath);
                             if (el != null) {
                                 if (isRestrictedNative(el) || isRestrictedJNI(el)) {
-                                    trees.printMessage(Diagnostic.Kind.NOTE, "Found a method marked with @RestrictedNative/JNI", node, cut);
+                                    if (DEBUG) {
+                                        trees.printMessage(Diagnostic.Kind.NOTE,
+                                            "Found a method marked with @RestrictedNative/JNI", node, cut);
+                                    }
+
+                                    StringBuilder buf = new StringBuilder();
+                                    buf.append(trees.getTypeMirror(curPath.getParentPath()));
+                                    buf.append(' ');
+                                    buf.append(node.getName());
+                                    buf.append(' ');
+                                    buf.append(trees.getTypeMirror(curPath));
+                                    declarations.add(buf.toString());
                                 }
+
                             }
                             return super.visitMethod(node, p);
                         }
                     }.scan(cut, null);
+                } else if (e.getKind() == Kind.COMPILATION) {
+                    File declsFile = new File(args[0]);
+                    declsFile.getParentFile().mkdirs();
+                    try (PrintWriter out = new PrintWriter(Files.newBufferedWriter(declsFile.toPath(), CREATE, APPEND))) {
+                        for (String decl : declarations) {
+                            out.println(decl);
+                        }
+                    } catch (IOException ioExp) {
+                        throw new UncheckedIOException(ioExp);
+                    }
                 }
             }
         });
