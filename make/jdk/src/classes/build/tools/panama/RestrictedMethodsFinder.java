@@ -43,8 +43,15 @@ import com.sun.source.util.TreePath;
 import com.sun.source.util.TreePathScanner;
 import com.sun.source.util.Trees;
 import javax.lang.model.element.Element;
+import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.tools.Diagnostic;
+import javax.lang.model.type.ArrayType;
+import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.ExecutableType;
+import javax.lang.model.type.TypeKind;
+import javax.lang.model.type.TypeMirror;
+import javax.lang.model.util.Types;
 import static java.nio.file.StandardOpenOption.*;
 
 public class RestrictedMethodsFinder implements Plugin {
@@ -56,31 +63,35 @@ public class RestrictedMethodsFinder implements Plugin {
 
     @Override
     public void init(JavacTask task, String... args) {
+        Trees trees = Trees.instance(task);
+        Types types = task.getTypes();
         task.addTaskListener(new TaskListener() {
             @Override
             public void finished(TaskEvent e) {
                 if (e.getKind() == Kind.ANALYZE) {
-                    Trees trees = Trees.instance(task);
                     CompilationUnitTree cut = e.getCompilationUnit();
                     new TreePathScanner<Void, Void>() {
                         @Override
                         public Void visitMethod(MethodTree node, Void p) {
                             TreePath curPath = getCurrentPath();
                             Element el = trees.getElement(curPath);
-                            if (el != null) {
-                                if (isRestrictedNative(el) || isRestrictedJNI(el)) {
+                            if (el instanceof ExecutableElement) {
+                                ExecutableElement execElem = (ExecutableElement)el;
+                                if (isRestrictedNative(execElem) || isRestrictedJNI(execElem)) {
                                     if (DEBUG) {
                                         trees.printMessage(Diagnostic.Kind.NOTE,
                                             "Found a method marked with @RestrictedNative/JNI", node, cut);
                                     }
-
                                     StringBuilder buf = new StringBuilder();
-                                    buf.append(trees.getTypeMirror(curPath.getParentPath()));
-                                    buf.append(' ');
-                                    buf.append(node.getName());
-                                    buf.append(' ');
-                                    buf.append(trees.getTypeMirror(curPath));
-                                    declarations.add(buf.toString());
+                                    Element parent = trees.getElement(curPath.getParentPath());
+                                    if (parent instanceof TypeElement) {
+                                        buf.append(getInternalName((TypeElement)parent));
+                                        buf.append(' ');
+                                        buf.append(node.getName());
+                                        buf.append(' ');
+                                        buf.append(getInternalSignature(types, execElem));
+                                        declarations.add(buf.toString());
+                                    }
                                 }
 
                             }
@@ -102,16 +113,62 @@ public class RestrictedMethodsFinder implements Plugin {
         });
     }
 
-    private boolean isRestrictedNative(Element el) {
-        return checkAnnotation(el, RESTRICTED_NATIVE);
+    private String getInternalName(TypeElement typeElem) {
+        return typeElem.getQualifiedName().toString().replace(".", "/");
     }
 
-    private boolean isRestrictedJNI(Element el) {
-        return checkAnnotation(el, RESTRICTED_JNI);
+    private String getInternalSignature(Types types, ExecutableElement execElem) {
+        ExecutableType et = (ExecutableType)types.erasure(execElem.asType());
+        StringBuilder buf = new StringBuilder();
+        buf.append('(');
+        for (TypeMirror pt : et.getParameterTypes()) {
+            buf.append(getInternalSignature(pt));
+        }
+        buf.append(')');
+        buf.append(getInternalSignature(et.getReturnType()));
+        return buf.toString();
     }
 
-    private boolean checkAnnotation(Element el, String name) {
-        return el.getAnnotationMirrors().stream().anyMatch(
+    private String getInternalSignature(TypeMirror type) {
+        TypeKind kind = type.getKind();
+        switch (kind) {
+            case ARRAY:
+                return "[" + getInternalSignature(((ArrayType)type).getComponentType());
+            case BOOLEAN:
+                return "Z";
+            case BYTE:
+                return "B";
+            case CHAR:
+                return "C";
+            case DECLARED:
+                return "L" + getInternalName((TypeElement)((DeclaredType)type).asElement()) + ";";
+            case DOUBLE:
+                return "D";
+            case FLOAT:
+                return "F";
+            case INT:
+                return "I";
+            case LONG:
+                return "J";
+            case SHORT:
+                return "S";
+            case VOID:
+                return "V";
+            default:
+                throw new AssertionError("unexpected type kind: " + kind);
+        }
+    }
+
+    private boolean isRestrictedNative(ExecutableElement execElem) {
+        return checkAnnotation(execElem, RESTRICTED_NATIVE);
+    }
+
+    private boolean isRestrictedJNI(ExecutableElement execElem) {
+        return checkAnnotation(execElem, RESTRICTED_JNI);
+    }
+
+    private boolean checkAnnotation(Element execElem, String name) {
+        return execElem.getAnnotationMirrors().stream().anyMatch(
             am -> ((TypeElement) am.getAnnotationType().asElement()).getQualifiedName().contentEquals(name));
     }
 
