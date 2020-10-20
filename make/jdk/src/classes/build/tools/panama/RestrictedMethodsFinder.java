@@ -77,7 +77,8 @@ public class RestrictedMethodsFinder implements Plugin {
                             Element el = trees.getElement(curPath);
                             if (el instanceof ExecutableElement) {
                                 ExecutableElement execElem = (ExecutableElement)el;
-                                if (isRestrictedNative(execElem) || isRestrictedJNI(execElem)) {
+                                boolean isPanama = isRestrictedNative(execElem);
+                                if (isPanama || isRestrictedJNI(execElem)) {
                                     if (DEBUG) {
                                         trees.printMessage(Diagnostic.Kind.NOTE,
                                             "Found a method marked with @RestrictedNative/JNI", node, cut);
@@ -90,6 +91,9 @@ public class RestrictedMethodsFinder implements Plugin {
                                         buf.append(node.getName());
                                         buf.append(' ');
                                         buf.append(getInternalSignature(types, execElem));
+                                        buf.append(' ');
+                                        // warnig or error
+                                        buf.append(isPanama);
                                         declarations.add(buf.toString());
                                     }
                                 }
