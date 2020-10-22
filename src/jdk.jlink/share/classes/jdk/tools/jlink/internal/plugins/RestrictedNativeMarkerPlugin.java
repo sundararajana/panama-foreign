@@ -39,15 +39,16 @@ import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.stream.Collectors;
 
+import jdk.internal.org.objectweb.asm.Attribute;
+import jdk.internal.org.objectweb.asm.ByteVector;
 import jdk.internal.org.objectweb.asm.ClassReader;
 import jdk.internal.org.objectweb.asm.ClassVisitor;
 import jdk.internal.org.objectweb.asm.ClassWriter;
 import jdk.internal.org.objectweb.asm.MethodVisitor;
-import jdk.internal.org.objectweb.asm.ModuleVisitor;
 import jdk.internal.org.objectweb.asm.Opcodes;
+
 import static jdk.internal.org.objectweb.asm.Opcodes.*;
 
-import jdk.tools.jlink.internal.ModuleSorter;
 import jdk.tools.jlink.plugin.PluginException;
 import jdk.tools.jlink.plugin.ResourcePool;
 import jdk.tools.jlink.plugin.ResourcePoolBuilder;
@@ -60,8 +61,11 @@ public final class RestrictedNativeMarkerPlugin extends AbstractPlugin {
     private static final boolean DEBUG = Boolean.getBoolean("jlink.restricted_native_marker.debug");
     private static final String RESTRICTED_NATIVE_METHODS_FILE = "restricted_native_methods.txt";
 
+    // info on restricted methods
     private List<RestrictedMethod> restrictedMethods;
-    private Set<String> restrictedNativeModules = new HashSet<>();
+    // modules that use Panama RestrictedNative methods
+    private Set<String> restrictedPanamaModules = new HashSet<>();
+    // modules that use Panama RestrictedJNI methods
     private Set<String> restrictedJNIModules = new HashSet<>();
 
     public RestrictedNativeMarkerPlugin() {
@@ -85,9 +89,9 @@ public final class RestrictedNativeMarkerPlugin extends AbstractPlugin {
         // - if none was supplied we look for the default file
         if (mainArgument == null || !mainArgument.startsWith("@")) {
             try (InputStream traceFile =
-                    this.getClass().getResourceAsStream(RESTRICTED_NATIVE_METHODS_FILE)) {
+                         this.getClass().getResourceAsStream(RESTRICTED_NATIVE_METHODS_FILE)) {
                 restrictedMethods = new BufferedReader(new InputStreamReader(traceFile)).
-                    lines().map(RestrictedMethod::new).collect(Collectors.toList());
+                        lines().map(RestrictedMethod::new).collect(Collectors.toList());
             } catch (Exception e) {
                 throw new PluginException("Couldn't read " + RESTRICTED_NATIVE_METHODS_FILE, e);
             }
@@ -97,11 +101,11 @@ public final class RestrictedNativeMarkerPlugin extends AbstractPlugin {
         }
 
         if (DEBUG) {
-            System.err.println("Restricted methods start");
+            System.err.println("====== Restricted methods start ======");
             for (RestrictedMethod rm : restrictedMethods) {
                 rm.print();
             }
-            System.err.println("Restricted methods end");
+            System.err.println("====== Restricted methods end ======");
         }
     }
 
@@ -115,11 +119,20 @@ public final class RestrictedNativeMarkerPlugin extends AbstractPlugin {
 
     @Override
     public ResourcePool transform(ResourcePool in, ResourcePoolBuilder out) {
-        // pass through all other resources
+        // pass through all resources other than "module-info.class"es
         in.entries()
-            .filter(data -> !data.path().endsWith("/module-info.class"))
-            .forEach(data -> checkNative(data, out));
-        // validate, transform (if needed), and add the module-info.class files
+                .filter(data -> !data.path().endsWith("/module-info.class"))
+                .forEach(data -> checkNative(data, out));
+
+        // if a module is both panama and JNI, make sure
+        restrictedJNIModules.removeAll(restrictedPanamaModules);
+
+        if (DEBUG) {
+            System.err.printf("restricted panama modules: %s\n", restrictedPanamaModules);
+            System.err.printf("restricted jni modules: %s\n", restrictedJNIModules);
+        }
+
+        // transform (if needed), and add the module-info.class files
         transformModuleInfos(in, out);
 
         return out.build();
@@ -127,61 +140,83 @@ public final class RestrictedNativeMarkerPlugin extends AbstractPlugin {
 
     private void checkNative(ResourcePoolEntry data, ResourcePoolBuilder out) {
         out.add(data);
-        if (isRestrictedNative(data.moduleName())) {
-            return; // nothing to do. already detected it as native
+        String moduleName = data.moduleName();
+        if (isRestrictedPanama(moduleName)) {
+            // already detected to be restricted panama module. No need to check
+            // further resources.
+            if (DEBUG) {
+                System.err.printf("module %s marked, skipping %s\n", moduleName, data.path());
+            }
+            return;
         }
+
+        // check only .class resources
         if (data.type().equals(ResourcePoolEntry.Type.CLASS_OR_RESOURCE) &&
-            data.path().endsWith(".class")) {
+                data.path().endsWith(".class")) {
             NativeLevel nl = findNativeLevel(data.contentBytes());
-            if (nl != NativeLevel.NONE) {
-                if (DEBUG) {
-                    System.err.println(data.path() + " native level " + nl);
-                }
+            switch (nl) {
+                case JNI:
+                    if (DEBUG) {
+                        System.err.printf("module %s is %s due to %s\n", moduleName, nl, data.path());
+                    }
+                    restrictedJNIModules.add(moduleName);
+                    break;
+                case PANAMA:
+                    if (DEBUG) {
+                        System.err.printf("module %s is %s due to %s\n", moduleName, nl, data.path());
+                    }
+                    restrictedPanamaModules.add(moduleName);
+                    break;
+                default:
+                    break;
             }
         }
     }
 
-    private boolean isRestrictedNative(String moduleName) {
-        return restrictedNativeModules.contains(moduleName);
+    private boolean isRestrictedPanama(String moduleName) {
+        return restrictedPanamaModules.contains(moduleName);
     }
 
-    // find native level of a given .class resource
+    // find the native level of the given .class resource
     private NativeLevel findNativeLevel(byte[] bytes) {
         ClassReader reader = new ClassReader(bytes);
         NativeLevel[] nl = new NativeLevel[1];
         nl[0] = NativeLevel.NONE;
-        
+
         ClassVisitor cv = new ClassVisitor(Opcodes.ASM7) {
             @Override
             public MethodVisitor visitMethod(int access,
-                                 String name, String descriptor,
-                                 String signature, String[] exceptions) {
-               if ((access & ACC_NATIVE) == 0 && (access & ACC_ABSTRACT) == 0) {
-                   return new MethodVisitor(Opcodes.ASM7,
-                               super.visitMethod(access, name, descriptor,
-                                                 signature, exceptions)) {
-                       
-                       @Override
-                       public void visitMethodInsn(int opcode, String owner,
-                           String name, String descriptor, boolean isInterface) {
-                           super.visitMethodInsn(opcode, owner, name, descriptor, isInterface);
-                           NativeLevel nlTemp = findNativeLevel(owner, name, descriptor);
-                           switch (nlTemp) {
-                               case NONE:
-                                   break;
-                               case JNI:
-                                   if (nl[0] == NativeLevel.NONE) {
-                                       nl[0] = nlTemp;
-                                   }
-                                   break;
-                               case PANAMA:
-                                   nl[0] = nlTemp;
-                           }
-                       }
-                   };
-               } else {
-                   return null;
-               } 
+                                             String name, String descriptor,
+                                             String signature, String[] exceptions) {
+                if ((access & ACC_NATIVE) == 0 && (access & ACC_ABSTRACT) == 0) {
+                    return new MethodVisitor(Opcodes.ASM7,
+                            super.visitMethod(access, name, descriptor,
+                                    signature, exceptions)) {
+                        @Override
+                        public void visitMethodInsn(int opcode, String owner,
+                                                    String name, String descriptor, boolean isInterface) {
+                            super.visitMethodInsn(opcode, owner, name, descriptor, isInterface);
+                            NativeLevel nlTemp = findNativeLevel(owner, name, descriptor);
+                            switch (nlTemp) {
+                                case NONE:
+                                    break;
+                                case JNI:
+                                    // if already JNI or PANAMA, nothing to do
+                                    // Note that we don't want to overwrite a PANAMA resource
+                                    // as JNI resource as later is for less severe (warning vs error)
+                                    if (nl[0] == NativeLevel.NONE) {
+                                        nl[0] = nlTemp;
+                                    }
+                                    break;
+                                case PANAMA:
+                                    nl[0] = nlTemp;
+                                    break;
+                            }
+                        }
+                    };
+                } else {
+                    return null;
+                }
             }
         };
 
@@ -189,41 +224,73 @@ public final class RestrictedNativeMarkerPlugin extends AbstractPlugin {
         return nl[0];
     }
 
+    // find the native level of a specific call - check against known restricted methods
     private NativeLevel findNativeLevel(String owner, String name, String descriptor) {
         for (RestrictedMethod rm : restrictedMethods) {
             if (rm.match(owner, name, descriptor)) {
-                return rm.panama? NativeLevel.PANAMA : NativeLevel.JNI;
+                return rm.panama ? NativeLevel.PANAMA : NativeLevel.JNI;
             }
         }
         return NativeLevel.NONE;
     }
 
     /**
-     * Validates and transforms the module-info.class files in the modules, adding
-     * the ModulePackages class file attribute if needed.
+     * Transforms the module-info.class files in the modules, marking native or not.
      */
     private void transformModuleInfos(ResourcePool in, ResourcePoolBuilder out) {
-        // Sort modules in the topological order so that java.base is always first.
-        new ModuleSorter(in.moduleView()).sorted().forEach(module -> {
+        in.moduleView().modules().forEach(module -> {
             ResourcePoolEntry data = module.findEntry("module-info.class").orElseThrow(
-                // automatic modules not supported
-                () ->  new PluginException("module-info.class not found for " +
-                        module.name() + " module")
+                    // FIXME: automatic modules not supported yet
+                    // add something in META-INFO?
+                    () -> new PluginException("module-info.class not found for " +
+                            module.name() + " module")
             );
 
             assert module.name().equals(data.moduleName());
 
-            //try {
-                byte[] content = data.contentBytes();
+            String moduleName = data.moduleName();
+            boolean isPanama = restrictedPanamaModules.contains(moduleName);
+            boolean isJNI = restrictedJNIModules.contains(moduleName);
+            if (isPanama || isJNI) {
+                // add a class level attribute if we found a panama or JNI method
+                // call from the currently visited module
+                ClassReader reader = new ClassReader(data.contentBytes());
+                ClassWriter cw = new ClassWriter(reader, 0);
+                ClassVisitor cv = new ClassVisitor(Opcodes.ASM7, cw) {
+                    @Override
+                    public void visitEnd() {
+                        cw.visitAttribute(newAttribute(isPanama ? "RestrictedNative" : "RestrictedJNI"));
+                        super.visitEnd();
+                    }
+                };
+
+                reader.accept(cv, 0);
 
                 // add resource pool entry
+                out.add(data.copyWithContent(cw.toByteArray()));
+            } else {
+                // not a native module. copy module-info 'as is'
                 out.add(data);
-            //} catch (IOException e) {
-            //    throw new PluginException(e);
-            //}
+            }
         });
     }
 
+    // empty .class attribute of given name
+    private Attribute newAttribute(String name) {
+        return new Attribute(name) {
+            @Override
+            protected ByteVector write(
+                    final ClassWriter classWriter,
+                    final byte[] code,
+                    final int codeLength,
+                    final int maxStack,
+                    final int maxLocals) {
+                return new ByteVector();
+            }
+        };
+    }
+
+    // info about a restricted method
     private static class RestrictedMethod {
         final String className;
         final String methodName;
@@ -239,7 +306,8 @@ public final class RestrictedNativeMarkerPlugin extends AbstractPlugin {
         }
 
         void print() {
-            System.err.printf("%s %s %s %b\n", className, methodName, methodDesc, panama);
+            System.err.printf("Restricted method: %s %s %s %s\n", className, methodName,
+                    methodDesc, panama ? "PANAMA" : "JNI");
         }
 
         boolean match(String owner, String name, String descriptor) {
