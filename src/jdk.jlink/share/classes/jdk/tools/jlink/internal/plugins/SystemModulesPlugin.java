@@ -115,6 +115,11 @@ public final class SystemModulesPlugin extends AbstractPlugin {
     }
 
     @Override
+    public Category getType() {
+        return Category.MODULEINFO_TRANSFORMER;
+    }
+
+    @Override
     public Set<State> getState() {
         return enabled ? EnumSet.of(State.AUTO_ENABLED, State.FUNCTIONAL)
                        : EnumSet.of(State.DISABLED);
@@ -913,7 +918,7 @@ public final class SystemModulesPlugin extends AbstractPlugin {
                     mresmv.visitVarInsn(ALOAD, 0);
                     pushInt(mresmv, index);
                     pushInt(mresmv, 1);
-                    mresmv.visitInsn(IASTORE);
+                    mresmv.visitInsn(BASTORE);
                 }
             }
             mresmv.visitVarInsn(ALOAD, 0);

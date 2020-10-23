@@ -446,6 +446,7 @@ public final class ModuleBootstrap {
 
         // Step 6: Define all modules to the VM
 
+
         ModuleLayer bootLayer = ModuleLayer.empty().defineModules(cf, clf);
         Counters.add("jdk.module.boot.6.layerCreateTime");
 
@@ -883,6 +884,25 @@ public final class ModuleBootstrap {
                 jla.addEnableNativeAccess(module.get());
             } else {
                 warnUnknownModule(ENABLE_NATIVE_ACCESS, name);
+            }
+        }
+
+        Configuration cf = layer.configuration();
+        for (Module module : layer.modules()) {
+            if (module.isNamed() && !jla.isNative(module)) {
+                String moduleName = module.getName();
+                Optional<ResolvedModule> optModRef = cf.findModule(moduleName);
+                if (optModRef.isPresent()) {
+                    ModuleReference mref = optModRef.get().reference();
+                    if (mref instanceof ModuleReferenceImpl) {
+                        ModuleReferenceImpl mrefImpl = (ModuleReferenceImpl) mref;
+                        if (mrefImpl.usesRestrictedJNI()) {
+                            warn("JNI access from module not specified in --enable-native-access: " + moduleName);
+                        } else if (mrefImpl.usesRestrictedNative()) {
+                            fail("Panama access from module not specified in --enable-native-access: " + moduleName);
+                        }
+                    }
+                }
             }
         }
     }
