@@ -78,7 +78,9 @@ class ModuleReferences {
                                                        attrs.target(),
                                                        attrs.recordedHashes(),
                                                        hasher,
-                                                       attrs.moduleResolution());
+                                                       attrs.moduleResolution(),
+                                                       attrs.usesRestrictedNative(),
+                                                       attrs.usesRestrictedJNI());
         if (patcher != null)
             mref = patcher.patchIfNeeded(mref);
 

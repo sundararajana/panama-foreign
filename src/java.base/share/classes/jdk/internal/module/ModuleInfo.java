@@ -92,14 +92,22 @@ public final class ModuleInfo {
         private final ModuleTarget target;
         private final ModuleHashes recordedHashes;
         private final ModuleResolution moduleResolution;
+        private final boolean usesRestrictedNative;
+        private final boolean usesRestrictedJNI;
+
         Attributes(ModuleDescriptor descriptor,
                    ModuleTarget target,
                    ModuleHashes recordedHashes,
-                   ModuleResolution moduleResolution) {
+                   ModuleResolution moduleResolution,
+                   boolean usesRestrictedNative,
+                   boolean usesRestrictedJNI) {
             this.descriptor = descriptor;
             this.target = target;
             this.recordedHashes = recordedHashes;
             this.moduleResolution = moduleResolution;
+            this.usesRestrictedNative = usesRestrictedNative;
+            this.usesRestrictedJNI = usesRestrictedJNI;
+
         }
         public ModuleDescriptor descriptor() {
             return descriptor;
@@ -113,6 +121,8 @@ public final class ModuleInfo {
         public ModuleResolution moduleResolution() {
             return moduleResolution;
         }
+        public boolean usesRestrictedNative() { return usesRestrictedNative; }
+        public boolean usesRestrictedJNI() { return usesRestrictedJNI; }
     }
 
 
@@ -232,6 +242,8 @@ public final class ModuleInfo {
         ModuleTarget moduleTarget = null;
         ModuleHashes moduleHashes = null;
         ModuleResolution moduleResolution = null;
+        boolean moduleRestrictedNative = false;
+        boolean moduleRestrictedJNI = false;
 
         for (int i = 0; i < attributes_count ; i++) {
             int name_index = in.readUnsignedShort();
@@ -273,6 +285,12 @@ public final class ModuleInfo {
 
                 case MODULE_RESOLUTION :
                     moduleResolution = readModuleResolution(in, cpool);
+                    break;
+                case MODULE_RESTRICTED_JNI:
+                    moduleRestrictedJNI = true;
+                    break;
+                case MODULE_RESTRICTED_NATIVE:
+                    moduleRestrictedNative = true;
                     break;
 
                 default:
@@ -337,7 +355,9 @@ public final class ModuleInfo {
         return new Attributes(descriptor,
                               moduleTarget,
                               moduleHashes,
-                              moduleResolution);
+                              moduleResolution,
+                              moduleRestrictedNative,
+                              moduleRestrictedJNI);
     }
 
     /**

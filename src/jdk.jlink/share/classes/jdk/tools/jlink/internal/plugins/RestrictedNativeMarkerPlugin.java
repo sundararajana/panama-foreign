@@ -48,6 +48,7 @@ import jdk.internal.org.objectweb.asm.MethodVisitor;
 import jdk.internal.org.objectweb.asm.Opcodes;
 
 import static jdk.internal.org.objectweb.asm.Opcodes.*;
+import static jdk.internal.module.ClassFileConstants.*;
 
 import jdk.tools.jlink.plugin.PluginException;
 import jdk.tools.jlink.plugin.ResourcePool;
@@ -259,7 +260,7 @@ public final class RestrictedNativeMarkerPlugin extends AbstractPlugin {
                 ClassVisitor cv = new ClassVisitor(Opcodes.ASM7, cw) {
                     @Override
                     public void visitEnd() {
-                        cw.visitAttribute(newAttribute(isPanama ? "RestrictedNative" : "RestrictedJNI"));
+                        cw.visitAttribute(newAttribute(isPanama ? MODULE_RESTRICTED_NATIVE : MODULE_RESTRICTED_JNI));
                         super.visitEnd();
                     }
                 };
