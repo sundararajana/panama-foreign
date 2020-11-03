@@ -39,6 +39,7 @@ import jdk.internal.access.SharedSecrets;
 import jdk.internal.loader.NativeLibrary;
 import jdk.internal.reflect.CallerSensitive;
 import jdk.internal.reflect.Reflection;
+import jdk.internal.vm.annotation.RestrictedJNI;
 
 /**
  * Every Java application has a single instance of class
@@ -307,6 +308,7 @@ public class Runtime {
      * @see     #exec(String[], String[], File)
      * @see     ProcessBuilder
      */
+    @RestrictedJNI
     public Process exec(String command) throws IOException {
         return exec(command, null, null);
     }
@@ -348,6 +350,7 @@ public class Runtime {
      * @see     #exec(String[], String[], File)
      * @see     ProcessBuilder
      */
+    @RestrictedJNI
     public Process exec(String command, String[] envp) throws IOException {
         return exec(command, envp, null);
     }
@@ -402,6 +405,7 @@ public class Runtime {
      * @see     ProcessBuilder
      * @since 1.3
      */
+    @RestrictedJNI
     public Process exec(String command, String[] envp, File dir)
         throws IOException {
         if (command.isEmpty())
@@ -445,6 +449,7 @@ public class Runtime {
      *
      * @see     ProcessBuilder
      */
+    @RestrictedJNI
     public Process exec(String cmdarray[]) throws IOException {
         return exec(cmdarray, null, null);
     }
@@ -488,6 +493,7 @@ public class Runtime {
      *
      * @see     ProcessBuilder
      */
+    @RestrictedJNI
     public Process exec(String[] cmdarray, String[] envp) throws IOException {
         return exec(cmdarray, envp, null);
     }
@@ -582,6 +588,7 @@ public class Runtime {
      * @see     ProcessBuilder
      * @since 1.3
      */
+    @RestrictedJNI
     public Process exec(String[] cmdarray, String[] envp, File dir)
         throws IOException {
         return new ProcessBuilder(cmdarray)

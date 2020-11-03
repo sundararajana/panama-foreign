@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
 import jdk.internal.event.ProcessStartEvent;
+import jdk.internal.vm.annotation.RestrictedJNI;
 import sun.security.action.GetPropertyAction;
 
 /**
@@ -1069,6 +1070,7 @@ public final class ProcessBuilder
      *
      * @see Runtime#exec(String[], String[], java.io.File)
      */
+    @RestrictedJNI
     public Process start() throws IOException {
         return start(redirects);
     }
@@ -1081,6 +1083,7 @@ public final class ProcessBuilder
      * @return the new Process
      * @throws IOException if an I/O error occurs
      */
+    @RestrictedJNI
     private Process start(Redirect[] redirects) throws IOException {
         // Must convert to array first -- a malicious user-supplied
         // list might try to circumvent the security check.
