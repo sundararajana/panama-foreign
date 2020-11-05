@@ -137,7 +137,8 @@ public class Lookup {
     static String lookupWithIPv4Prefer() throws IOException {
         String java = JDKToolFinder.getTestJDKTool("java");
         String testClz = Lookup.class.getName();
-        List<String> cmd = List.of(java, "-Djava.net.preferIPv4Stack=true",
+        List<String> cmd = List.of(java, enableNativeAccessOption(),
+                                   "-Djava.net.preferIPv4Stack=true",
                 "-cp", CLASS_PATH, testClz);
         System.out.println("Executing: " + cmd);
         return new OutputAnalyzer(new ProcessBuilder(cmd).start()).getOutput();
@@ -146,9 +147,15 @@ public class Lookup {
     static String reverseWithIPv4Prefer(String addr) throws IOException {
         String java = JDKToolFinder.getTestJDKTool("java");
         String testClz = Lookup.class.getName();
-        List<String> cmd = List.of(java, "-Djava.net.preferIPv4Stack=true",
+        List<String> cmd = List.of(java, enableNativeAccessOption(),
+                                   "-Djava.net.preferIPv4Stack=true",
                                    "-cp", CLASS_PATH, testClz, "reverse", addr);
         System.out.println("Executing: " + cmd);
         return new OutputAnalyzer(new ProcessBuilder(cmd).start()).getOutput();
+    }
+
+    private static String enableNativeAccessOption() {
+        return "--enable-native-access=jdk.internal.ed,jdk.internal.le,jdk.jdi," +
+            "jdk.jshell,jdk.compiler,jdk.attach";
     }
 }

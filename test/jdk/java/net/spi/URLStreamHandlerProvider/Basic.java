@@ -230,6 +230,7 @@ public class Basic {
 
         List<String> commands = new ArrayList<>();
         commands.add(java);
+        commands.addAll(enableNativeAccessOptions());
         for (String prop : sysProps)
             commands.add(prop);
 
@@ -320,5 +321,16 @@ public class Basic {
             this.exitValue = exitValue;
             this.output = output;
         }
+    }
+
+    private static List<String> enableNativeAccessOptions() {
+        return List.of(
+             "--enable-native-access=ALL-UNNAMED/org.openjdk.nettest",
+             "--enable-native-access=jdk.internal.ed",
+             "--enable-native-access=jdk.internal.le",
+             "--enable-native-access=jdk.jdi",
+             "--enable-native-access=jdk.jshell",
+             "--enable-native-access=jdk.compiler",
+             "--enable-native-access=jdk.attach");
     }
 }

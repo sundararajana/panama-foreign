@@ -27,7 +27,10 @@
  * @library /test/lib
  * @summary Socket returned by ServerSocket.accept() is inherited by child process on Windows
  * @author Chris Hegarty
+ * @run main org.openjdk.nettest.AcceptInheritHandle
  */
+
+package org.openjdk.nettest;
 
 import java.io.*;
 import java.net.*;
@@ -96,11 +99,12 @@ public class AcceptInheritHandle {
 
         List<String> commands = new ArrayList<>();
         commands.add(JAVA);
+        commands.addAll(enableNativeAccessOptions());
         for (String arg : jvmArgs)
             commands.add(arg);
         commands.add("-cp");
         commands.add(CLASSPATH);
-        commands.add("AcceptInheritHandle");
+        commands.add("org.openjdk.nettest.AcceptInheritHandle");
         commands.add(ssp.name());
 
         System.out.println("Executing: "+ commands);
@@ -156,5 +160,16 @@ public class AcceptInheritHandle {
             dos.flush();
             Thread.sleep(30 * 1000);
         }
+    }
+
+    private static List<String> enableNativeAccessOptions() {
+        return List.of(
+             "--enable-native-access=ALL-UNNAMED/org.openjdk.nettest",
+             "--enable-native-access=jdk.internal.ed",
+             "--enable-native-access=jdk.internal.le",
+             "--enable-native-access=jdk.jdi",
+             "--enable-native-access=jdk.jshell",
+             "--enable-native-access=jdk.compiler",
+             "--enable-native-access=jdk.attach");
     }
 }

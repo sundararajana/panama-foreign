@@ -336,7 +336,10 @@ public class ContentHandlersTest {
                         new SequenceInputStream(
                                 Collections.enumeration(asList(src))));
         copy(concatenated, dst);
-        return dst.toString();
+        String[] lines = dst.toString().split(System.lineSeparator());
+        return Stream.of(lines).
+            filter(s -> !s.contains("WARNING: JNI access from module not specified in --enable-native-access")).
+            collect(Collectors.joining(System.lineSeparator()));
     }
 
     private static void copy(Reader src, Writer dst) throws IOException {
