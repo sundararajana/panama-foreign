@@ -27,5 +27,6 @@ include LauncherCommon.gmk
 
 $(eval $(call SetupBuildLauncher, jfr, \
     MAIN_CLASS := jdk.jfr.internal.tool.Main, \
+    JAVA_ARGS := --enable-native-access=jdk.compiler, \
     CFLAGS := -DEXPAND_CLASSPATH_WILDCARDS, \
 ))

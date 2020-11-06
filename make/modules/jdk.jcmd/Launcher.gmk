@@ -29,7 +29,10 @@ $(eval $(call SetupBuildLauncher, jinfo, \
     MAIN_CLASS := sun.tools.jinfo.JInfo, \
     JAVA_ARGS := \
         -Dsun.jvm.hotspot.debugger.useProcDebugger \
-        -Dsun.jvm.hotspot.debugger.useWindbgDebugger, \
+        -Dsun.jvm.hotspot.debugger.useWindbgDebugger \
+       --enable-native-access=jdk.compiler \
+       --enable-native-access=jdk.attach \
+       , \
     MACOSX_PRIVILEGED := true, \
 ))
 
@@ -37,26 +40,44 @@ $(eval $(call SetupBuildLauncher, jmap, \
     MAIN_CLASS := sun.tools.jmap.JMap, \
     JAVA_ARGS := \
         -Dsun.jvm.hotspot.debugger.useProcDebugger \
-        -Dsun.jvm.hotspot.debugger.useWindbgDebugger, \
+        -Dsun.jvm.hotspot.debugger.useWindbgDebugger \
+       --enable-native-access=jdk.compiler \
+       --enable-native-access=jdk.attach \
+       , \
     MACOSX_PRIVILEGED := true, \
 ))
 
 $(eval $(call SetupBuildLauncher, jps, \
     MAIN_CLASS := sun.tools.jps.Jps, \
+    JAVA_ARGS := \
+       --enable-native-access=jdk.compiler \
+       --enable-native-access=jdk.attach \
+       , \
 ))
 
 $(eval $(call SetupBuildLauncher, jstack, \
     MAIN_CLASS := sun.tools.jstack.JStack, \
     JAVA_ARGS := \
         -Dsun.jvm.hotspot.debugger.useProcDebugger \
-        -Dsun.jvm.hotspot.debugger.useWindbgDebugger, \
+        -Dsun.jvm.hotspot.debugger.useWindbgDebugger \
+       --enable-native-access=jdk.compiler \
+       --enable-native-access=jdk.attach \
+       , \
     MACOSX_PRIVILEGED := true, \
 ))
 
 $(eval $(call SetupBuildLauncher, jstat, \
     MAIN_CLASS := sun.tools.jstat.Jstat, \
+    JAVA_ARGS := \
+       --enable-native-access=jdk.compiler \
+       --enable-native-access=jdk.attach \
+       , \
 ))
 
 $(eval $(call SetupBuildLauncher, jcmd, \
     MAIN_CLASS := sun.tools.jcmd.JCmd, \
+    JAVA_ARGS := \
+       --enable-native-access=jdk.compiler \
+       --enable-native-access=jdk.attach \
+       , \
 ))

@@ -30,6 +30,12 @@ $(eval $(call SetupBuildLauncher, jconsole, \
     JAVA_ARGS := --add-opens java.base/java.io=jdk.jconsole \
                  --add-modules ALL-DEFAULT \
 		 -Djconsole.showOutputViewer \
-		 -Djdk.attach.allowAttachSelf=true, \
+		 -Djdk.attach.allowAttachSelf=true \
+                 --enable-native-access=jdk.internal.ed \
+                 --enable-native-access=jdk.compiler \
+                 --enable-native-access=jdk.attach \
+                 --enable-native-access=jdk.jdi \
+                 --enable-native-access=jdk.jshell \
+                 --enable-native-access=jdk.internal.le, \
     CFLAGS_windows := -DJAVAW, \
 ))

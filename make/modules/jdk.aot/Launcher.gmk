@@ -49,6 +49,12 @@ $(eval $(call SetupBuildLauncher, jaotc, \
         -Djvmci.UseProfilingInformation=false \
         -Dgraal.UseExceptionProbability=false \
         -Djvmci.Compiler=graal \
-        --add-modules ALL-DEFAULT \
+        --add-modules=ALL-DEFAULT \
+        --enable-native-access=jdk.internal.ed \
+        --enable-native-access=jdk.compiler \
+        --enable-native-access=jdk.attach \
+        --enable-native-access=jdk.jdi \
+        --enable-native-access=jdk.jshell \
+        --enable-native-access=jdk.internal.le \
     , \
 ))

@@ -27,18 +27,27 @@ include LauncherCommon.gmk
 
 $(eval $(call SetupBuildLauncher, jimage,\
     MAIN_CLASS := jdk.tools.jimage.Main, \
+    JAVA_ARGS :=  --add-modules=ALL-DEFAULT \
+       --enable-native-access=jdk.internal.ed \
+       --enable-native-access=jdk.compiler \
+       --enable-native-access=jdk.attach \
+       --enable-native-access=jdk.jdi \
+       --enable-native-access=jdk.jshell \
+       --enable-native-access=jdk.internal.le \
+       , \
     CFLAGS := -DENABLE_ARG_FILES, \
 ))
 
 $(eval $(call SetupBuildLauncher, jlink,\
     MAIN_CLASS := jdk.tools.jlink.internal.Main, \
-    JAVA_ARGS :=  --add-modules ALL-DEFAULT, \
+    JAVA_ARGS := --enable-native-access=jdk.compiler, \
     CFLAGS := -DENABLE_ARG_FILES \
         -DEXPAND_CLASSPATH_WILDCARDS, \
 ))
 
 $(eval $(call SetupBuildLauncher, jmod,\
     MAIN_CLASS := jdk.tools.jmod.Main, \
+    JAVA_ARGS := --enable-native-access=jdk.compiler, \
     CFLAGS := -DENABLE_ARG_FILES \
         -DEXPAND_CLASSPATH_WILDCARDS, \
 ))

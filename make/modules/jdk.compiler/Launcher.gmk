@@ -40,5 +40,6 @@ $(eval $(call SetupBuildLauncher, javac, \
 
 $(eval $(call SetupBuildLauncher, serialver, \
     MAIN_CLASS := sun.tools.serialver.SerialVer, \
+    JAVA_ARGS := --enable-native-access=jdk.compiler, \
     CFLAGS := -DEXPAND_CLASSPATH_WILDCARDS, \
 ))

@@ -27,5 +27,11 @@ include LauncherCommon.gmk
 
 $(eval $(call SetupBuildLauncher, jrunscript, \
     MAIN_CLASS := com.sun.tools.script.shell.Main, \
-    JAVA_ARGS := --add-modules ALL-DEFAULT, \
+    JAVA_ARGS := --add-modules=ALL-DEFAULT \
+       --enable-native-access=jdk.internal.ed \
+       --enable-native-access=jdk.compiler \
+       --enable-native-access=jdk.attach \
+       --enable-native-access=jdk.jdi \
+       --enable-native-access=jdk.jshell \
+       --enable-native-access=jdk.internal.le, \
 ))

@@ -27,6 +27,13 @@ include LauncherCommon.gmk
 
 $(eval $(call SetupBuildLauncher, javadoc, \
     MAIN_CLASS := jdk.javadoc.internal.tool.Main, \
-    JAVA_ARGS := --add-modules ALL-DEFAULT, \
+    JAVA_ARGS := --add-modules=ALL-DEFAULT \
+       --enable-native-access=jdk.internal.ed \
+       --enable-native-access=jdk.compiler \
+       --enable-native-access=jdk.attach \
+       --enable-native-access=jdk.jdi \
+       --enable-native-access=jdk.jshell \
+       --enable-native-access=jdk.internal.le \
+       , \
     CFLAGS := -DEXPAND_CLASSPATH_WILDCARDS, \
 ))

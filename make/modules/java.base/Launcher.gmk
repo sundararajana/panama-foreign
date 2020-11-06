@@ -51,6 +51,7 @@ endif
 
 $(eval $(call SetupBuildLauncher, keytool, \
     MAIN_CLASS := sun.security.tools.keytool.Main, \
+    JAVA_ARGS := --enable-native-access=jdk.compiler, \
 ))
 
 ################################################################################

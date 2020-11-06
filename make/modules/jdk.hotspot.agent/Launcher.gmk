@@ -27,5 +27,8 @@ include LauncherCommon.gmk
 
 $(eval $(call SetupBuildLauncher, jhsdb, \
     MAIN_CLASS := sun.jvm.hotspot.SALauncher, \
+    JAVA_ARGS := \
+        --enable-native-access=jdk.hotspot.agent \
+        --enable-native-access=jdk.compiler, \
     MACOSX_PRIVILEGED := true, \
 ))

@@ -27,4 +27,6 @@ include LauncherCommon.gmk
 
 $(eval $(call SetupBuildLauncher, jpackage, \
     MAIN_CLASS := jdk.jpackage.main.Main, \
+    JAVA_ARGS :=  --enable-native-access=jdk.incubator.jpackage \
+       --enable-native-access=jdk.compiler, \
 ))
