@@ -27,5 +27,12 @@ include LauncherCommon.gmk
 
 $(eval $(call SetupBuildLauncher, jshell, \
     MAIN_CLASS := jdk.internal.jshell.tool.JShellToolProvider, \
+    JAVA_ARGS := --enable-native-access=jdk.internal.ed \
+        --enable-native-access=jdk.compiler \
+        --enable-native-access=jdk.attach \
+        --enable-native-access=jdk.jdi \
+        --enable-native-access=jdk.jshell \
+        --enable-native-access=jdk.internal.le \
+        , \
     CFLAGS := -DEXPAND_CLASSPATH_WILDCARDS, \
 ))
