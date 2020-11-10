@@ -76,6 +76,7 @@ public class NoConsoleOutput {
                 + " --enable-native-access=jdk.internal.ed"
                 + " --enable-native-access=jdk.jshell"
                 + " --enable-native-access=jdk.jdi"
+                + " --enable-native-access=jdk.jpackage"
                 + " -Djava.util.logging.config.file="
                 + loggingPropertiesFile, "", out, err);
         try {
