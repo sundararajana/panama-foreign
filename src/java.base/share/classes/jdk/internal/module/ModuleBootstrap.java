@@ -883,7 +883,8 @@ public final class ModuleBootstrap {
             if (module.isPresent()) {
                 jla.addEnableNativeAccess(module.get());
             } else {
-                warnUnknownModule(ENABLE_NATIVE_ACCESS, name);
+                // silently skip.
+                // warnUnknownModule(ENABLE_NATIVE_ACCESS, name);
             }
         }
 

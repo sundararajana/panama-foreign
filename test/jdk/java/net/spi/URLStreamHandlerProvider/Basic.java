@@ -331,6 +331,7 @@ public class Basic {
              "--enable-native-access=jdk.jdi",
              "--enable-native-access=jdk.jshell",
              "--enable-native-access=jdk.compiler",
+             "--enable-native-access=jdk.jpackage",
              "--enable-native-access=jdk.attach");
     }
 }

@@ -156,6 +156,6 @@ public class Lookup {
 
     private static String enableNativeAccessOption() {
         return "--enable-native-access=jdk.internal.ed,jdk.internal.le,jdk.jdi," +
-            "jdk.jshell,jdk.compiler,jdk.attach";
+            "jdk.jshell,jdk.compiler,jdk.attach,jdk.jpackage";
     }
 }
