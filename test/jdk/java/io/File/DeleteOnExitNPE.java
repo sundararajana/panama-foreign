@@ -43,6 +43,10 @@ public class DeleteOnExitNPE implements Runnable
         }
     }
 
+    private static boolean isNativeWarning(String str) {
+        return str.contains(str);
+    }
+
     public static void runTest() throws Exception {
         String cmd = System.getProperty("java.home") + File.separator +
                      "bin" + File.separator + "java" +
@@ -56,10 +60,16 @@ public class DeleteOnExitNPE implements Runnable
         boolean failed = false;
         String str;
         while ((str = isReader.readLine()) != null) {
+            if (isNativeWarning(str)) {
+                continue;
+            }
             failed = true;
             System.out.println(str);
         }
         while ((str = esReader.readLine()) != null) {
+            if (isNativeWarning(str)) {
+                continue;
+            }
             failed = true;
             System.err.println(str);
         }

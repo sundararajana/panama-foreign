@@ -264,6 +264,17 @@ public class InitialContextTest {
             throw new RuntimeException(r.output);
     }
 
+    private static List<String> enableNativeAccessOptions() {
+        return List.of(
+             "--enable-native-access=jdk.jpackage",
+             "--enable-native-access=jdk.internal.ed",
+             "--enable-native-access=jdk.internal.le",
+             "--enable-native-access=jdk.jdi",
+             "--enable-native-access=jdk.jshell",
+             "--enable-native-access=jdk.compiler",
+             "--enable-native-access=jdk.attach");
+    }
+
     private static Result java(Map<String, String> properties,
                                Collection<Path> classpath,
                                String classname) {
@@ -272,6 +283,7 @@ public class InitialContextTest {
 
         List<String> commands = new ArrayList<>();
         commands.add(java);
+        commands.addAll(enableNativeAccessOptions());
         commands.addAll(properties.entrySet()
                 .stream()
                 .map(e -> "-D" + e.getKey() + "=" + e.getValue())
