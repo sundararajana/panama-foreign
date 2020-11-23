@@ -297,7 +297,6 @@ public interface CLinker {
      */
     @RestrictedNative
     static String toJavaStringRestricted(MemoryAddress addr) {
-        Utils.checkRestrictedAccess("CLinker.toJavaStringRestricted");
         Objects.requireNonNull(addr);
         return SharedUtils.toJavaStringInternal(NativeMemorySegmentImpl.EVERYTHING, addr.toRawLongValue(), Charset.defaultCharset());
     }
@@ -320,7 +319,6 @@ public interface CLinker {
      */
     @RestrictedNative
     static String toJavaStringRestricted(MemoryAddress addr, Charset charset) {
-        Utils.checkRestrictedAccess("CLinker.toJavaStringRestricted");
         Objects.requireNonNull(addr);
         Objects.requireNonNull(charset);
         return SharedUtils.toJavaStringInternal(NativeMemorySegmentImpl.EVERYTHING, addr.toRawLongValue(), charset);
@@ -414,7 +412,6 @@ public interface CLinker {
      */
     @RestrictedNative
     static void freeMemoryRestricted(MemoryAddress addr) {
-        Utils.checkRestrictedAccess("CLinker.freeMemoryRestricted");
         Objects.requireNonNull(addr);
         SharedUtils.freeMemoryInternal(addr);
     }
@@ -603,7 +600,6 @@ public interface CLinker {
          */
         @RestrictedNative
         static VaList ofAddressRestricted(MemoryAddress address) {
-            Utils.checkRestrictedAccess("VaList.ofAddressRestricted");
             Objects.requireNonNull(address);
             return SharedUtils.newVaListOfAddress(address);
         }
