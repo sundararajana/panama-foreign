@@ -24,8 +24,10 @@
 
 /*
  * @test
- * @run testng/othervm --enable-native-access=ALL-UNNAMED TestSharedAccess
+ * @run testng/othervm --enable-native-access=ALL-UNNAMED/jdk.foreign.test jdk.foreign.test.TestSharedAccess
  */
+
+package jdk.foreign.test;
 
 import jdk.incubator.foreign.*;
 import org.testng.annotations.*;

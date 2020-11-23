@@ -118,6 +118,7 @@ public interface MemoryAddress extends Addressable {
      * @throws IllegalAccessError if the runtime property {@code foreign.restricted} is not set to either
      * {@code permit}, {@code warn} or {@code debug} (the default value is set to {@code deny}).
      */
+    @RestrictedNative
     default MemorySegment asSegmentRestricted(long bytesSize) {
         return asSegmentRestricted(bytesSize, null, null);
     }

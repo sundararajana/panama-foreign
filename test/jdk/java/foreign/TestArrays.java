@@ -24,8 +24,10 @@
 
 /*
  * @test
- * @run testng/othervm --enable-native-access=ALL-UNNAMED TestArrays
+ * @run testng/othervm --enable-native-access=ALL-UNNAMED/jdk.foreign.test jdk.foreign.test.TestArrays
  */
+
+package jdk.foreign.test;
 
 import jdk.incubator.foreign.MemoryAddress;
 import jdk.incubator.foreign.MemoryLayout;
