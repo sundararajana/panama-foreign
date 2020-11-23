@@ -34,6 +34,7 @@ import jdk.internal.access.JavaLangAccess;
 import jdk.internal.access.SharedSecrets;
 import jdk.internal.misc.VM;
 import jdk.internal.module.IllegalAccessLogger;
+import jdk.internal.module.IllegalNativeAccessChecker;
 import jdk.internal.reflect.CallerSensitive;
 import jdk.internal.reflect.Reflection;
 import jdk.internal.reflect.ReflectionFactory;
@@ -698,12 +699,16 @@ public class AccessibleObject implements AnnotatedElement {
 
     final void checkRestricted(Executable e, Class<?> caller) throws IllegalAccessException {
         Module module = caller.getModule();
+        String callerPkg = caller.getPackageName();
         if (VM.isBooted() && e.isAnnotationPresent(RestrictedNative.class)) {
             JavaLangAccess jla = SharedSecrets.getJavaLangAccess();
             if (!jla.isNative(module)) {
                 String moduleName = module.isNamed() ?
                         module.getName() : "UNNAMED";
-                throw new IllegalAccessException("Illegal native access from module: " + moduleName);
+                if (module.isNamed() ||
+                        !IllegalNativeAccessChecker.isUnnamedModulePackageNative(callerPkg)) {
+                    throw new IllegalAccessException("Illegal native access from module: " + moduleName);
+                }
             }
         }
         if (VM.isBooted() && e.isAnnotationPresent(RestrictedJNI.class)) {
@@ -711,7 +716,10 @@ public class AccessibleObject implements AnnotatedElement {
             if (!jla.isNative(module)) {
                 String moduleName = module.isNamed() ?
                         module.getName() : "UNNAMED";
-                System.err.println("WARNING: Illegal native access from module: " + moduleName);
+                if (module.isNamed() ||
+                        !IllegalNativeAccessChecker.isUnnamedModulePackageNative(callerPkg)) {
+                    System.err.println("WARNING: Illegal native access from module: " + moduleName);
+                }
             }
         }
     }

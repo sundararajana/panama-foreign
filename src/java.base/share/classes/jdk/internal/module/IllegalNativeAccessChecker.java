@@ -52,6 +52,11 @@ public final class IllegalNativeAccessChecker {
         return checker().allowedUnnamedModulePackages;
     }
 
+    public static boolean isUnnamedModulePackageNative(String pkgName) {
+        String internalName = pkgName.replace(".", "/");
+        return enableNativeAccessAllUnnamedPackages().contains(internalName);
+    }
+
     private static IllegalNativeAccessChecker checker() {
         if (checker == null) {
             Set<String> allowedModuleNames = new HashSet<>();

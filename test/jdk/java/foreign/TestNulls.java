@@ -21,12 +21,15 @@
  *  questions.
  */
 
+// *     --enable-native-access=ALL-UNNAMED/org.testng
 /*
  * @test
  * @requires ((os.arch == "amd64" | os.arch == "x86_64") & sun.arch.data.model == "64") | os.arch == "aarch64"
  * @modules java.base/jdk.internal.ref
  *          jdk.incubator.foreign
- * @run testng/othervm --enable-native-access=ALL-UNNAMED/jdk.foreign.test jdk.foreign.test.TestNulls
+ * @run testng/othervm
+ *     --enable-native-access=ALL-UNNAMED/jdk.foreign.test
+ *     jdk.foreign.test.TestNulls
  */
 
 package jdk.foreign.test;
@@ -193,6 +196,7 @@ public class TestNulls {
             Class<?> cause = ex.getCause().getClass();
             assertEquals(cause, NullPointerException.class, "got " + cause.getName() + " - expected NullPointerException");
         } catch (Throwable ex) {
+            ex.printStackTrace();
             fail("Unexpected exception: " + ex);
         }
     }
