@@ -184,13 +184,13 @@ public final class RestrictedNativeMarkerPlugin extends AbstractPlugin {
         NativeLevel[] nl = new NativeLevel[1];
         nl[0] = NativeLevel.NONE;
 
-        ClassVisitor cv = new ClassVisitor(Opcodes.ASM7) {
+        ClassVisitor cv = new ClassVisitor(Opcodes.ASM8) {
             @Override
             public MethodVisitor visitMethod(int access,
                                              String name, String descriptor,
                                              String signature, String[] exceptions) {
                 if ((access & ACC_NATIVE) == 0 && (access & ACC_ABSTRACT) == 0) {
-                    return new MethodVisitor(Opcodes.ASM7,
+                    return new MethodVisitor(Opcodes.ASM8,
                             super.visitMethod(access, name, descriptor,
                                     signature, exceptions)) {
                         @Override
@@ -257,7 +257,7 @@ public final class RestrictedNativeMarkerPlugin extends AbstractPlugin {
                 // call from the currently visited module
                 ClassReader reader = new ClassReader(data.contentBytes());
                 ClassWriter cw = new ClassWriter(reader, 0);
-                ClassVisitor cv = new ClassVisitor(Opcodes.ASM7, cw) {
+                ClassVisitor cv = new ClassVisitor(Opcodes.ASM8, cw) {
                     @Override
                     public void visitEnd() {
                         cw.visitAttribute(newAttribute(isPanama ? MODULE_RESTRICTED_NATIVE : MODULE_RESTRICTED_JNI));
