@@ -32,8 +32,8 @@ import jdk.incubator.foreign.LibraryLookup;
 import jdk.incubator.foreign.MemoryLayout;
 import jdk.incubator.foreign.MemorySegment;
 import jdk.incubator.foreign.ResourceScope;
-import jdk.internal.loader.NativeLibraries;
 import jdk.internal.loader.NativeLibrary;
+import jdk.internal.loader.NativeLibraries;
 import jdk.internal.reflect.CallerSensitive;
 import jdk.internal.reflect.Reflection;
 
@@ -76,10 +76,6 @@ public final class LibrariesHelper {
         }
         return lookup(() -> nativeLibraries.loadLibrary(LibrariesHelper.class, file),
                 "Library not found: " + path);
-    }
-
-    public static LibraryLookup getDefaultLibrary() {
-        return LibraryLookupImpl.DEFAULT_LOOKUP;
     }
 
     static LibraryLookupImpl lookup(Supplier<NativeLibrary> librarySupplier, String notFoundMsg) {
@@ -141,8 +137,6 @@ public final class LibrariesHelper {
                 return Optional.empty();
             }
         }
-
-        static LibraryLookup DEFAULT_LOOKUP = new LibraryLookupImpl(NativeLibraries.defaultLibrary, ResourceScopeImpl.GLOBAL);
     }
 
     /* used for testing */

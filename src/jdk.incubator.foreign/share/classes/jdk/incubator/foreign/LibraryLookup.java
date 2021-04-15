@@ -106,7 +106,7 @@ public interface LibraryLookup {
         if (security != null) {
             security.checkPermission(new RuntimePermission("java.foreign.getDefaultLibrary"));
         }
-        return LibrariesHelper.getDefaultLibrary();
+        return LibrariesHelper.loadLibrary("cstdlib");
     }
 
     /**
