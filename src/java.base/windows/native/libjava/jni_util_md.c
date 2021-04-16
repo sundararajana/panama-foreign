@@ -37,27 +37,9 @@ void* getProcessHandle() {
 }
 
 /*
- * Windows doesn't have an RTLD_DEFAULT equivalent, so in stead we have to
- * iterate over all the modules loaded by the process to implement the
- * default library behaviour.
+ * This is unused
  */
 void* findEntryInProcess(const char* name) {
-    HANDLE hProcess = GetCurrentProcess();
-
-    HMODULE hMods[1024];
-    DWORD cbNeeded; // array size in bytes
-
-    // first come, first served
-    if (EnumProcessModules(hProcess, hMods, sizeof(hMods), &cbNeeded)) {
-        for (size_t i = 0; i < (cbNeeded / sizeof(HMODULE)); i++) {
-            HMODULE mod = hMods[i];
-            FARPROC proc = GetProcAddress(mod, name);
-            if(proc != NULL) {
-                return proc;
-            }
-        }
-    }
-
     return NULL;
 }
 
