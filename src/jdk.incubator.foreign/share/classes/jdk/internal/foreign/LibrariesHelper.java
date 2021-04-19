@@ -51,6 +51,7 @@ public final class LibrariesHelper {
     private static final NativeLibraries nativeLibraries =
             NativeLibraries.rawNativeLibraries(LibrariesHelper.class, true);
 
+    private static volatile boolean defaultLibLoaded = false;
     private static final Map<NativeLibrary, WeakReference<ResourceScope>> loadedLibraries = new ConcurrentHashMap<>();
 
     /**
@@ -59,6 +60,8 @@ public final class LibrariesHelper {
      * @param name Name of the shared library to load.
      */
     public static LibraryLookup loadLibrary(String name) {
+        if (name.equals("cstdlib"))
+            defaultLibLoaded = true;
         return lookup(() -> nativeLibraries.loadLibrary(LibrariesHelper.class, name),
                 "Library not found: " + name);
     }
@@ -74,6 +77,8 @@ public final class LibrariesHelper {
             throw new UnsatisfiedLinkError(
                     "Expecting an absolute path of the library: " + path);
         }
+        if (path.endsWith("msvcrt.dll"))
+            defaultLibLoaded = true;
         return lookup(() -> nativeLibraries.loadLibrary(LibrariesHelper.class, file),
                 "Library not found: " + path);
     }
@@ -141,6 +146,9 @@ public final class LibrariesHelper {
 
     /* used for testing */
     public static int numLoadedLibraries() {
-        return loadedLibraries.size();
+        int count = loadedLibraries.size();
+        return defaultLibLoaded? count - 1 : count;
     }
+
+    
 }
