@@ -25,6 +25,8 @@
  */
 package jdk.incubator.foreign;
 
+import jdk.internal.access.JavaLangAccess;
+import jdk.internal.access.SharedSecrets;
 import jdk.internal.foreign.NativeMemorySegmentImpl;
 import jdk.internal.foreign.PlatformLayouts;
 import jdk.internal.foreign.abi.SharedUtils;
@@ -36,6 +38,7 @@ import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodType;
 import java.nio.charset.Charset;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 import static jdk.internal.foreign.PlatformLayouts.*;
@@ -124,6 +127,33 @@ public interface CLinker {
     static CLinker getInstance() {
         Reflection.ensureNativeAccess(Reflection.getCallerClass());
         return SharedUtils.getSystemLinker();
+    }
+
+    private long findNative(ClassLoader loader, String name) {
+         SecurityManager security = System.getSecurityManager();
+         if (security != null) {
+             security.checkPermission(new RuntimePermission("java.foreign.lookup"));
+         }
+         Objects.requireNonNull(name);
+         JavaLangAccess javaLangAccess = SharedSecrets.getJavaLangAccess();
+         return javaLangAccess.findNative(loader, name);
+    }
+
+    @CallerSensitive
+    public default Optional<MemoryAddress> lookup(String name) {
+         Reflection.ensureNativeAccess(Reflection.getCallerClass());
+         ClassLoader loader = Reflection.getCallerClass().getClassLoader();
+         long addr = findNative(loader, name);
+         return addr == 0 ? Optional.empty() : Optional.of(MemoryAddress.ofLong(addr));
+    }
+
+    @CallerSensitive
+    public default Optional<MemorySegment> lookup(String name, MemoryLayout layout) {
+          Reflection.ensureNativeAccess(Reflection.getCallerClass());
+          ClassLoader loader = Reflection.getCallerClass().getClassLoader();
+          long addr = findNative(loader, name);
+          Objects.requireNonNull(layout);
+          return addr == 0 ? Optional.empty() : Optional.of(MemoryAddress.ofLong(addr).asSegment(layout.byteSize(), ResourceScope.globalScope()));
     }
 
     /**
