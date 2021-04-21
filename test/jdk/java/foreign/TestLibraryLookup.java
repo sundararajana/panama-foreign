@@ -30,9 +30,11 @@
 
 import jdk.incubator.foreign.CLinker;
 import jdk.incubator.foreign.MemoryAccess;
+import jdk.incubator.foreign.MemoryAddress;
 import jdk.incubator.foreign.MemoryLayout;
 import jdk.incubator.foreign.MemoryLayouts;
 import jdk.incubator.foreign.MemorySegment;
+import jdk.incubator.foreign.ResourceScope;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.*;
@@ -50,18 +52,18 @@ public class TestLibraryLookup {
     }
 
     @Test
-    public void testSimpleLookup() throws Throwable {
-        abi.lookup("f").get();
+    public void testSimpleLookup() {
+        assertNotEquals(abi.lookup("f"), MemoryAddress.NULL);
     }
 
     @Test
-    public void testInvalidSymbolLookup() throws Throwable {
-        assertTrue(abi.lookup("nonExistent").isEmpty());
+    public void testInvalidSymbolLookup() {
+        assertEquals(abi.lookup("nonExistent"), MemoryAddress.NULL);
     }
 
     @Test
     public void testVariableSymbolLookup() throws Throwable {
-        MemorySegment segment = abi.lookup("c", MemoryLayouts.JAVA_INT).get();
+        MemorySegment segment = abi.lookup("c").asSegment(MemoryLayouts.JAVA_INT.byteSize(), ResourceScope.globalScope());
         assertEquals(MemoryAccess.getInt(segment), 42);
     }
 
@@ -69,7 +71,7 @@ public class TestLibraryLookup {
     public void testBadVariableSymbolLookup() {
         try {
             MemoryLayout layout = MemoryLayouts.JAVA_INT.withBitAlignment(1 << 16);
-            MemorySegment segment = abi.lookup("c", layout).get();
+            MemorySegment segment = abi.lookup("c").asSegment(layout.byteSize(), ResourceScope.globalScope());
             // no exception, check that address is aligned
             if ((segment.address().toRawLongValue() % layout.byteAlignment()) != 0) {
                 fail("Unaligned address");

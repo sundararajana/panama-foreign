@@ -157,27 +157,27 @@ public class StdLibTest {
             System.loadLibrary("StdLibTest");
         }
 
-        final static MethodHandle strcat = abi.downcallHandle(abi.lookup("libc_strcat").get(),
+        final static MethodHandle strcat = abi.downcallHandle(abi.lookup("libc_strcat"),
                 MethodType.methodType(MemoryAddress.class, MemoryAddress.class, MemoryAddress.class),
                 FunctionDescriptor.of(C_POINTER, C_POINTER, C_POINTER));
 
-        final static MethodHandle strcmp = abi.downcallHandle(abi.lookup("libc_strcmp").get(),
+        final static MethodHandle strcmp = abi.downcallHandle(abi.lookup("libc_strcmp"),
                 MethodType.methodType(int.class, MemoryAddress.class, MemoryAddress.class),
                 FunctionDescriptor.of(C_INT, C_POINTER, C_POINTER));
 
-        final static MethodHandle puts = abi.downcallHandle(abi.lookup("libc_puts").get(),
+        final static MethodHandle puts = abi.downcallHandle(abi.lookup("libc_puts"),
                 MethodType.methodType(int.class, MemoryAddress.class),
                 FunctionDescriptor.of(C_INT, C_POINTER));
 
-        final static MethodHandle strlen = abi.downcallHandle(abi.lookup("libc_strlen").get(),
+        final static MethodHandle strlen = abi.downcallHandle(abi.lookup("libc_strlen"),
                 MethodType.methodType(int.class, MemoryAddress.class),
                 FunctionDescriptor.of(C_INT, C_POINTER));
 
-        final static MethodHandle gmtime = abi.downcallHandle(abi.lookup("libc_gmtime").get(),
+        final static MethodHandle gmtime = abi.downcallHandle(abi.lookup("libc_gmtime"),
                 MethodType.methodType(MemoryAddress.class, MemoryAddress.class),
                 FunctionDescriptor.of(C_POINTER, C_POINTER));
 
-        final static MethodHandle qsort = abi.downcallHandle(abi.lookup("libc_qsort").get(),
+        final static MethodHandle qsort = abi.downcallHandle(abi.lookup("libc_qsort"),
                 MethodType.methodType(void.class, MemoryAddress.class, long.class, long.class, MemoryAddress.class),
                 FunctionDescriptor.ofVoid(C_POINTER, C_LONG_LONG, C_LONG_LONG, C_POINTER));
 
@@ -185,15 +185,15 @@ public class StdLibTest {
 
         final static MethodHandle qsortCompar;
 
-        final static MethodHandle rand = abi.downcallHandle(abi.lookup("libc_rand").get(),
+        final static MethodHandle rand = abi.downcallHandle(abi.lookup("libc_rand"),
                 MethodType.methodType(int.class),
                 FunctionDescriptor.of(C_INT));
 
-        final static MethodHandle vprintf = abi.downcallHandle(abi.lookup("libc_vprintf").get(),
+        final static MethodHandle vprintf = abi.downcallHandle(abi.lookup("libc_vprintf"),
                 MethodType.methodType(int.class, MemoryAddress.class, VaList.class),
                 FunctionDescriptor.of(C_INT, C_POINTER, C_VA_LIST));
 
-        final static MemoryAddress printfAddr = abi.lookup("libc_printf").get();
+        final static MemoryAddress printfAddr = abi.lookup("libc_printf");
 
         final static FunctionDescriptor printfBase = FunctionDescriptor.of(C_INT, C_POINTER);
 

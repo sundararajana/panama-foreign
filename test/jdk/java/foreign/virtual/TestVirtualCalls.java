@@ -57,9 +57,17 @@ public class TestVirtualCalls {
             FunctionDescriptor.of(C_INT));
 
         System.loadLibrary("Virtual");
-        funcA = abi.lookup("funcA").orElseThrow();
-        funcB = abi.lookup("funcB").orElseThrow();
-        funcC = abi.lookup("funcC").orElseThrow();
+        funcA = lookup("funcA");
+        funcB = lookup("funcB");
+        funcC = lookup("funcC");
+    }
+
+    private static MemoryAddress lookup(String name) {
+        var addr = abi.lookup(name);
+        if (addr.equals(MemoryAddress.NULL)) {
+            throw new NullPointerException(name);
+        }
+        return addr; 
     }
 
     @Test

@@ -67,10 +67,18 @@ public class TestUpcallStructScope {
         C_INT.withName("p2")
     );
 
+    static MemoryAddress lookup(String name) {
+        var addr = LINKER.lookup(name);
+        if (addr.equals(MemoryAddress.NULL)) {
+            throw new NullPointerException(name);
+        }
+        return addr;
+    }
+
     static {
         System.loadLibrary("TestUpcallStructScope");
         MH_do_upcall = LINKER.downcallHandle(
-            LINKER.lookup("do_upcall").orElseThrow(),
+            lookup("do_upcall"),
             MethodType.methodType(void.class, MemoryAddress.class, MemorySegment.class),
             FunctionDescriptor.ofVoid(C_POINTER, S_PDI_LAYOUT)
         );

@@ -63,7 +63,7 @@ public class TestVarArgs {
     static {
         System.loadLibrary("VarArgs");
     }
-    static final MemoryAddress varargsAddr = abi.lookup("varargs").get();
+    static final MemoryAddress varargsAddr = abi.lookup("varargs");
 
     static final int WRITEBACK_BYTES_PER_ARG = 8;
 

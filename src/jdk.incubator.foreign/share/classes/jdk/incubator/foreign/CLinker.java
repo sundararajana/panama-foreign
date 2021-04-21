@@ -129,31 +129,18 @@ public interface CLinker {
         return SharedUtils.getSystemLinker();
     }
 
-    private long findNative(ClassLoader loader, String name) {
+    @CallerSensitive
+    public default MemoryAddress lookup(String name) {
+         Reflection.ensureNativeAccess(Reflection.getCallerClass());
+         ClassLoader loader = Reflection.getCallerClass().getClassLoader();
          SecurityManager security = System.getSecurityManager();
          if (security != null) {
              security.checkPermission(new RuntimePermission("java.foreign.lookup"));
          }
          Objects.requireNonNull(name);
          JavaLangAccess javaLangAccess = SharedSecrets.getJavaLangAccess();
-         return javaLangAccess.findNative(loader, name);
-    }
-
-    @CallerSensitive
-    public default Optional<MemoryAddress> lookup(String name) {
-         Reflection.ensureNativeAccess(Reflection.getCallerClass());
-         ClassLoader loader = Reflection.getCallerClass().getClassLoader();
-         long addr = findNative(loader, name);
-         return addr == 0 ? Optional.empty() : Optional.of(MemoryAddress.ofLong(addr));
-    }
-
-    @CallerSensitive
-    public default Optional<MemorySegment> lookup(String name, MemoryLayout layout) {
-          Reflection.ensureNativeAccess(Reflection.getCallerClass());
-          ClassLoader loader = Reflection.getCallerClass().getClassLoader();
-          long addr = findNative(loader, name);
-          Objects.requireNonNull(layout);
-          return addr == 0 ? Optional.empty() : Optional.of(MemoryAddress.ofLong(addr).asSegment(layout.byteSize(), ResourceScope.globalScope()));
+         long addr = javaLangAccess.findNative(loader, name);
+         return MemoryAddress.ofLong(addr);
     }
 
     /**
